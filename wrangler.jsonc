@@ -3,6 +3,13 @@
 	"main": "worker.js",
 	"compatibility_date": "2026-10-05",
     "keep_vars": true,
+    
+    "triggers": {
+        "crons": [
+            "* * * * *"
+        ]
+    },
+
 	"kv_namespaces": [
 		{
 			"binding": "PUSH_SUBSCRIPTIONS",
