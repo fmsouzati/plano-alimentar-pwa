@@ -556,14 +556,85 @@
             }
         }
 
+        .cycle-progress {
+            margin-top: 10px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 8px;
+        }
+
+        .cycle-progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .cycle-progress-bar {
+            margin-top: 7px;
+
+            width: 100%;
+            height: 6px;
+
+            background: rgba(255,255,255,0.12);
+
+            border-radius: 999px;
+
+            overflow: hidden;
+        }
+
+        .cycle-progress-fill {
+            width: 0%;
+            height: 100%;
+
+            background: #38bdf8;
+
+            border-radius: 999px;
+
+            transition: width 0.4s ease;
+        }
+
+        .cycle-period {
+            margin-top: 5px;
+
+            font-size: 0.68rem;
+
+            color: #94a3b8;
+        }
+
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>Plano de Nutrição & Configuração do App</h1>
-        <p>Atleta: Felipe Matos de Souza | Duração: 8 Semanas</p>
+        <h1>Plano de Alta Performance & Definição</h1>
+        <p>Atleta: Felipe Matos de Souza</p>
+
+        <div class="cycle-progress">
+            <div class="cycle-progress-header">
+                <span id="cycle-week">Semana 1/8</span>
+                <span id="cycle-percentage">12,5%</span>
+            </div>
+
+            <div class="cycle-progress-bar">
+                <div
+                    id="cycle-progress-fill"
+                    class="cycle-progress-fill"
+                ></div>
+            </div>
+
+            <div
+                id="cycle-period"
+                class="cycle-period"
+            >
+                05/10/2026 a 11/10/2026
+            </div>
+        </div>
         
         <div class="metrics-grid">
             <div class="metric-card">

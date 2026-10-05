@@ -1423,6 +1423,204 @@ async function verificarNotificacoesAgendadas() {
     await verificarNotificacoesHidratacao();
 }
 
+// ======================================================
+// PROGRESSO DO CICLO DE 8 SEMANAS
+// ======================================================
+
+function atualizarProgressoCiclo() {
+
+    const DATA_INICIO =
+        new Date(2026, 9, 5);
+
+    const TOTAL_SEMANAS =
+        8;
+
+    const DIAS_POR_SEMANA =
+        7;
+
+    const TOTAL_DIAS =
+        TOTAL_SEMANAS * DIAS_POR_SEMANA;
+
+
+    const hoje =
+        new Date();
+
+    hoje.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    DATA_INICIO.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    const diferencaMs =
+        hoje - DATA_INICIO;
+
+    const diferencaDias =
+        Math.floor(
+            diferencaMs /
+            (1000 * 60 * 60 * 24)
+        );
+
+
+    let semanaAtual =
+        Math.floor(
+            diferencaDias /
+            DIAS_POR_SEMANA
+        ) + 1;
+
+
+    if (semanaAtual < 1) {
+        semanaAtual = 1;
+    }
+
+
+    if (
+        semanaAtual >
+        TOTAL_SEMANAS
+    ) {
+        semanaAtual =
+            TOTAL_SEMANAS;
+    }
+
+
+    let progressoPercentual =
+        (
+            semanaAtual /
+            TOTAL_SEMANAS
+        ) * 100;
+
+
+    const fimCiclo =
+        new Date(
+            DATA_INICIO
+        );
+
+    fimCiclo.setDate(
+        DATA_INICIO.getDate() +
+        TOTAL_DIAS - 1
+    );
+
+
+    const cicloConcluido =
+        hoje > fimCiclo;
+
+
+    if (cicloConcluido) {
+
+        semanaAtual =
+            TOTAL_SEMANAS;
+
+        progressoPercentual =
+            100;
+    }
+
+
+    const inicioSemana =
+        new Date(
+            DATA_INICIO
+        );
+
+    inicioSemana.setDate(
+        DATA_INICIO.getDate() +
+        (
+            semanaAtual - 1
+        ) * DIAS_POR_SEMANA
+    );
+
+
+    const fimSemana =
+        new Date(
+            inicioSemana
+        );
+
+    fimSemana.setDate(
+        inicioSemana.getDate() +
+        6
+    );
+
+
+    const formatarData =
+        data => {
+
+            return data
+                .toLocaleDateString(
+                    "pt-BR"
+                );
+        };
+
+
+    const semanaElemento =
+        document.getElementById(
+            "cycle-week"
+        );
+
+    const percentualElemento =
+        document.getElementById(
+            "cycle-percentage"
+        );
+
+    const barraElemento =
+        document.getElementById(
+            "cycle-progress-fill"
+        );
+
+    const periodoElemento =
+        document.getElementById(
+            "cycle-period"
+        );
+
+
+    if (
+        !semanaElemento ||
+        !percentualElemento ||
+        !barraElemento ||
+        !periodoElemento
+    ) {
+        return;
+    }
+
+
+    if (cicloConcluido) {
+
+        semanaElemento.textContent =
+            "Ciclo concluído • 8/8";
+
+        percentualElemento.textContent =
+            "100%";
+
+        periodoElemento.textContent =
+            `Ciclo: ${formatarData(DATA_INICIO)} a ${formatarData(fimCiclo)}`;
+
+    } else {
+
+        semanaElemento.textContent =
+            `Semana ${semanaAtual}/8`;
+
+        percentualElemento.textContent =
+            `${progressoPercentual.toLocaleString(
+                "pt-BR",
+                {
+                    maximumFractionDigits: 1
+                }
+            )}%`;
+
+        periodoElemento.textContent =
+            `${formatarData(inicioSemana)} a ${formatarData(fimSemana)}`;
+    }
+
+
+    barraElemento.style.width =
+        `${progressoPercentual}%`;
+}
 
 // ======================================================
 // INICIALIZAÇÃO DO APP
@@ -1443,6 +1641,8 @@ document.addEventListener(
         configurarBotaoNotificacoes();
 
         verificarNotificacoesAgendadas();
+
+        atualizarProgressoCiclo();
     }
 );
 
