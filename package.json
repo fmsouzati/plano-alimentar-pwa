@@ -19,5 +19,8 @@
   "description": "",
   "dependencies": {
     "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "wrangler": "^4.147.0"
   }
 }
