@@ -1,0 +1,23 @@
+{
+  "name": "plano-alimentar-pwa",
+  "version": "1.0.0",
+  "main": "service-worker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fmsouzati/plano-alimentar-pwa.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fmsouzati/plano-alimentar-pwa/issues"
+  },
+  "homepage": "https://github.com/fmsouzati/plano-alimentar-pwa#readme",
+  "description": "",
+  "dependencies": {
+    "web-push": "^3.6.7"
+  }
+}
