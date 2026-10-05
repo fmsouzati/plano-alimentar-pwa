@@ -435,6 +435,127 @@
             opacity: 0.6;
             cursor: default;
         }
+
+        /* Melhorias de layout e períodos */
+        .metrics-grid {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .metric-card {
+            padding: 6px 5px;
+            border-radius: 7px;
+        }
+
+        .metric-card .val {
+            font-size: 0.82rem;
+            line-height: 1.15;
+        }
+
+        .metric-card .lbl {
+            margin-top: 2px;
+            font-size: 0.58rem;
+            line-height: 1.15;
+        }
+
+        .meal-time {
+            white-space: nowrap;
+        }
+
+        .meal-card.current-meal-highlight {
+            border: 2px solid var(--success);
+            background: #f0fdf4;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.12);
+        }
+
+        .meal-card.current-meal-highlight::before {
+            content: "PERÍODO ATUAL";
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: var(--success);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .reference-panels {
+            margin-top: 18px;
+        }
+
+        .reference-panels .macro-table-container,
+        .reference-panels .water-card {
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 599px) {
+            body {
+                padding: 8px;
+            }
+
+            header {
+                padding: 14px;
+            }
+
+            header h1 {
+                font-size: 1.15rem;
+            }
+
+            header p {
+                font-size: 0.74rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 5px;
+            }
+
+            .metric-card {
+                padding: 5px 4px;
+            }
+
+            .metric-card .val {
+                font-size: 0.78rem;
+            }
+
+            .metric-card .lbl {
+                font-size: 0.56rem;
+            }
+
+            .next-meal-card,
+            .next-water-card,
+            .notification-settings {
+                padding: 10px;
+            }
+
+            .daily-macros-grid {
+                gap: 5px;
+            }
+
+            .daily-macros-grid div {
+                padding: 6px 4px;
+            }
+
+            .daily-macros-grid span {
+                font-size: 0.8rem;
+            }
+
+            .daily-macros-grid small {
+                font-size: 0.56rem;
+            }
+
+            .macro-table-container {
+                overflow-x: auto;
+            }
+
+            .macro-table {
+                min-width: 540px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -473,7 +594,7 @@
 
         <div id="daily-macros" class="daily-macros">
             <div id="next-meal-card" class="next-meal-card">
-                <div class="next-meal-label">Próxima refeição</div>
+                <div id="next-meal-label" class="next-meal-label">Próxima refeição</div>
 
                 <div class="next-meal-main">
                     <div>
@@ -488,7 +609,7 @@
             </div>
 
             <div id="next-water-card" class="next-water-card">
-            <div class="next-water-label">Próxima hidratação</div>
+            <div id="next-water-label" class="next-water-label">Próxima hidratação</div>
 
             <div class="next-water-main">
                 <div>
@@ -548,6 +669,507 @@
 
     </header>
 
+    <!-- Navegação por Abas -->
+    <div class="nav-tabs">
+        <button class="tab-btn" data-day="segunda" onclick="switchTab('segunda', this)">Segunda</button>
+        <button class="tab-btn" data-day="terca" onclick="switchTab('terca', this)">Terça</button>
+        <button class="tab-btn" data-day="quarta" onclick="switchTab('quarta', this)">Quarta</button>
+        <button class="tab-btn" data-day="quinta" onclick="switchTab('quinta', this)">Quinta</button>
+        <button class="tab-btn" data-day="sexta" onclick="switchTab('sexta', this)">Sexta</button>
+        <button class="tab-btn" data-day="sabado" onclick="switchTab('sabado', this)">Sábado</button>
+        <button class="tab-btn" data-day="domingo" onclick="switchTab('domingo', this)">Domingo</button>
+        <button class="tab-btn" data-day="flexivel" onclick="switchTab('flexivel', this)">Guia Flexível / 80-20</button>
+    </div>
+
+    <!-- SEGUNDA-FEIRA -->
+    <div id="segunda" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Pré-Treino Imediato</span>
+                <span class="meal-time" data-start="05:40" data-end="06:10">05:40 - 06:10</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + 5g Creatina + 3g Arginina</li>
+                    <li>1 banana média + 1 col. sopa de mel (ou aveia)</li>
+                    <li>1 xícara de café sem açúcar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Pós-Treino / Café da Manhã</span>
+                <span class="meal-time" data-start="08:30" data-end="09:00">08:30 - 09:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>2 fatias de pão de fôrma (ou 1 pão francês sem miolo)</li>
+                    <li>2 ovos inteiros mexidos ou cozidos</li>
+                    <li>1 col. sopa rasa de requeijão cremoso light</li>
+                    <li>1 xícara de café sem açúcar (ou com pingo de leite)</li>
+                </ul>
+                <div class="tip-box">
+                    <strong>Opção Rápida em Shake:</strong> 1 scoop de Whey + 200ml de leite + 1 banana + 30g de aveia.
+                </div>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Almoço</span>
+                <span class="meal-time" data-start="12:30" data-end="13:00">12:30 - 13:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>4 col. sopa de arroz branco/integral (100g)</li>
+                    <li>1 concha média de feijão (100g)</li>
+                    <li>140g de peito de frango grelhado ou carne de porco magra</li>
+                    <li>Salada à vontade (alface, tomate, cenoura) + 1 col. chá de azeite</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Lanche da Tarde</span>
+                <span class="meal-time" data-start="16:30" data-end="17:00">16:30 - 17:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>1 pão de fôrma com pastinha de frango desfiado com maionese light (ou tapioca com queijo)</li>
+                    <li>1 porção de fruta (1 maçã ou 1 laranja ou 200g de melancia)</li>
+                    <li>1 xícara de café sem açúcar ou chá leão</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">5. Jantar</span>
+                <span class="meal-time" data-start="20:00" data-end="20:30">20:00 - 20:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>3 col. sopa de arroz + 1 concha pequena de feijão</li>
+                    <li>130g de carne cozida ou carne moída magra</li>
+                    <li>Salada/Verduras (abóbora, brócolis, cenoura) à vontade</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- TERÇA-FEIRA -->
+    <div id="terca" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Pré-Treino</span>
+                <span class="meal-time" data-start="05:40" data-end="06:10">05:40 - 06:10</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + Creatina + Arginina</li>
+                    <li>1 banana + 15g de aveia + café sem açúcar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Pós-Treino (Treino Pesado de Perna)</span>
+                <span class="meal-time" data-start="08:30" data-end="09:00">08:30 - 09:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Shake anabólico: 1 scoop de Whey + 200ml de leite + 1 banana + 30g de aveia</li>
+                    <li>OU 2 fatias de pão de fôrma com 2 ovos + requeijão light</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Almoço</span>
+                <span class="meal-time" data-start="12:30" data-end="13:00">12:30 - 13:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>150g de mandioca ou batata cozida (substitui o arroz)</li>
+                    <li>1 concha de feijão</li>
+                    <li>140g de carne cozida ou bife magro</li>
+                    <li>Prato grande de salada folhosa</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Lanche da Tarde</span>
+                <span class="meal-time" data-start="16:30" data-end="17:00">16:30 - 17:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Tapioca (40g de massa) recheada com 1 fatia de queijo + 1 ovo ou frango</li>
+                    <li>1 café sem açúcar + 1 maçã</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">5. Jantar</span>
+                <span class="meal-time" data-start="20:00" data-end="20:30">20:00 - 20:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Mexido caseiro controlado: 3 col. sopa de arroz, feijão, 130g de carne cozida/moída, legumes picados + 1 col. sopa rasa de farinha.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUARTA-FEIRA -->
+    <div id="quarta" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Pré-Treino (Musculação + Corrida 8km)</span>
+                <span class="meal-time" data-start="05:40" data-end="06:10">05:40 - 06:10</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + Creatina + Arginina</li>
+                    <li>1 banana grande + 1 col. sopa reforçada de mel</li>
+                    <li>Café sem açúcar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Pós-Treino Reestruturador</span>
+                <span class="meal-time" data-start="08:30" data-end="09:00">08:30 - 09:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>2 fatias de pão de fôrma + 2 ovos + requeijão light</li>
+                    <li>1 fatia grande de mamão ou 200g de melão/melancia</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Almoço</span>
+                <span class="meal-time" data-start="12:30" data-end="13:00">12:30 - 13:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>5 col. sopa de arroz + 1 concha de feijão</li>
+                    <li>150g de peito de frango em tiras ou carne magra</li>
+                    <li>Salada colorida à vontade</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Lanche da Tarde</span>
+                <span class="meal-time" data-start="16:30" data-end="17:00">16:30 - 17:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>1 scoop de Whey com aveia e leite/água OU pão com pastinha de frango</li>
+                    <li>1 laranja ou maçã</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">5. Jantar</span>
+                <span class="meal-time" data-start="20:00" data-end="20:30">20:00 - 20:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Macarrão Alho e Óleo (1 pegador/120g cozido) + 2 col. sopa de arroz + 130g de frango/carne</li>
+                    <li>Salada com bastante brócolis ou vegetais verdes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUINTA-FEIRA -->
+    <div id="quinta" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Pré-Treino (Funcional)</span>
+                <span class="meal-time" data-start="05:40" data-end="06:10">05:40 - 06:10</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + Creatina + Arginina</li>
+                    <li>1 banana + café sem açúcar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Pós-Treino</span>
+                <span class="meal-time" data-start="08:30" data-end="09:00">08:30 - 09:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>1 pão francês sem miolo com pão e ovo + requeijão light</li>
+                    <li>Café com pingo de leite</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Almoço</span>
+                <span class="meal-time" data-start="12:30" data-end="13:00">12:30 - 13:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>4 col. sopa de arroz + 1 concha de feijão</li>
+                    <li>140g de bife de porco grelhado ou frango</li>
+                    <li>Abóbora cozida + salada verde à vontade</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Lanche da Tarde</span>
+                <span class="meal-time" data-start="16:30" data-end="17:00">16:30 - 17:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Tapioca com queijo ou pão de fôrma com frango</li>
+                    <li>Café sem açúcar + 1 fatia de melão</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">5. Jantar</span>
+                <span class="meal-time" data-start="20:00" data-end="20:30">20:00 - 20:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Pão com carne moída magra (Buraco quente saudável): 1 pão francês + 120g de carne moída com molho natural e salada.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEXTA-FEIRA -->
+    <div id="sexta" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Pré-Treino (Abdominal + Corrida 8km)</span>
+                <span class="meal-time" data-start="05:40" data-end="06:10">05:40 - 06:10</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + Creatina + Arginina</li>
+                    <li>1 banana + 1 col. sopa de mel + café</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Pós-Treino</span>
+                <span class="meal-time" data-start="08:30" data-end="09:00">08:30 - 09:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Shake de Whey com aveia e fruta OU 2 fatias de pão de fôrma + 2 ovos</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Almoço</span>
+                <span class="meal-time" data-start="12:30" data-end="13:00">12:30 - 13:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>4 col. sopa de arroz + feijão</li>
+                    <li>140g de proteína magra</li>
+                    <li>Salada completa</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Lanche da Tarde</span>
+                <span class="meal-time" data-start="16:30" data-end="17:00">16:30 - 17:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Pão com ovo/frango ou Tapioca</li>
+                    <li>1 café sem açúcar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">5. Jantar / Opção Social de Sexta</span>
+                <span class="meal-time" data-start="20:30" data-end="21:00">20:30 - 21:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li><strong>Opção Caseira:</strong> Cachorro quente caseiro (1 pão de hot dog, 1 a 2 salsichas cozidas, molho de tomate, vinagrete, pouca batata palha).</li>
+                    <li><strong>Opção Saída/Japonês:</strong> Combo de Sushi (12 a 16 peças focadas em sashimis/niguiris).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- SÁBADO -->
+    <div id="sabado" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Manhã (Pré-Vôlei - 2h de jogo)</span>
+                <span class="meal-time" data-start="08:00" data-end="08:30">08:00 - 08:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + Creatina + Arginina</li>
+                    <li>2 fatias de pão com ovo e requeijão light ou Shake reforçado</li>
+                    <li>1 banana extra antes de entrar em quadra</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Almoço Pós-Vôlei (Churrasco / Família)</span>
+                <span class="meal-time" data-start="13:00" data-end="13:30">13:00 - 13:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li><strong>No Churrasco:</strong> 1 pão de alho, 2 a 3 fatias de carnes magras/asinha/linguiça, 2 col. de farofa, vinagrete à vontade.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Lanche da Tarde</span>
+                <span class="meal-time" data-start="17:00" data-end="17:30">17:00 - 17:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>1 porção de fruta fresca ou 1 café sem açúcar com biscoito caseiro em porção moderada.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Jantar / Refeição Livre Controle</span>
+                <span class="meal-time" data-start="20:30" data-end="21:00">20:30 - 21:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li><strong>Opção Pizza:</strong> 2 a 3 fatias de pizza.</li>
+                    <li><strong>Opção Hambúrguer:</strong> 1 Hambúrguer artesanal + refrigerante zero.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- DOMINGO -->
+    <div id="domingo" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Pré-Longão de Corrida (10 a 18km)</span>
+                <span class="meal-time" data-start="06:00" data-end="06:30">06:00 - 06:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + Creatina + Arginina</li>
+                    <li>2 fatias de pão de fôrma com geleia/mel ou 1 banana grande reforçada</li>
+                    <li>1 xícara de café sem açúcar</li>
+                </ul>
+                <div class="warning-box">
+                    <strong>Alerta App / Longão:</strong> Acima de 12km, consumir 1 sachê de gel de carboidrato ou 300ml de bebida isotônica na metade do percurso.
+                </div>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Pós-Longão</span>
+                <span class="meal-time" data-start="09:30" data-end="10:00">09:30 - 10:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Shake de Whey com leite, banana e aveia OU Pão com ovos reforçado + copo de suco natural sem açúcar.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Almoço de Domingo</span>
+                <span class="meal-time" data-start="13:00" data-end="13:30">13:00 - 13:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Arroz, feijão com bacon/calabresa em porção moderada, salada e proteína magra.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Jantar</span>
+                <span class="meal-time" data-start="19:30" data-end="20:00">19:30 - 20:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Sopa de legumes com frango/carne moída ou Mexido leve com pouca gordura.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- GUIA FLEXÍVEL 80/20 -->
+    <div id="flexivel" class="day-section">
+        <div class="substitutions-grid">
+            <div class="sub-card">
+                <div class="sub-title">🍺 Cerveja / Álcool no Fim de Semana</div>
+                <ul style="font-size:0.85rem; padding-left:16px;">
+                    <li>Mantenha a meta de água elevada antes do evento.</li>
+                    <li>Intercale cada copo de cerveja com 1 copo de água pura.</li>
+                    <li>Se beber mais de 4 latões, reduza o carboidrato do jantar do mesmo dia.</li>
+                </ul>
+            </div>
+
+            <div class="sub-card">
+                <div class="sub-title">🔄 Substituições Rápidas de Carbs</div>
+                <ul style="font-size:0.85rem; padding-left:16px;">
+                    <li><strong>Arroz (4 col. sopa):</strong> 120g Batata cozida / 100g Mandioca / 100g Macarrão.</li>
+                    <li><strong>Peito de Frango (140g):</strong> 140g Carne moída / 150g Peixe / 130g Bife de Porco / 4 Ovos.</li>
+                    <li><strong>Pão de Fôrma (2 fatias):</strong> 1 Pão Francês sem miolo / 1 Tapioca média (40g).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- PAINÉIS DE REFERÊNCIA -->
+    <div class="reference-panels">
     <!-- Tabela de Metas de Macronutrientes para o App -->
     <div class="macro-table-container">
         <strong style="color: var(--primary); font-size: 0.95rem;">🎯 Metas de Macronutrientes por Tipo de Dia (Base App)</strong>
@@ -602,513 +1224,17 @@
         </div>
         <div class="meal-content">
             <ul>
-                <li><strong>05:30:</strong> 900 ml de água ao acordar (misturar Creatina + Arginina)</li>
-                <li><strong>07:45 - 08:15:</strong> 300 ml de água (durante o treino)</li>
-                <li><strong>10:00:</strong> 500 ml de água (Garrafa 1 - Metade da Manhã)</li>
-                <li><strong>11:30:</strong> 500 ml de água (Garrafa 1 - Final da Manhã)</li>
-                <li><strong>14:30:</strong> 500 ml de água (Garrafa 2 - Início da Tarde)</li>
-                <li><strong>16:00:</strong> 500 ml de água (Garrafa 2 - Final da Tarde)</li>
-                <li><strong>19:30:</strong> 500 ml de água (Início da Noite)</li>
+                <li><strong>05:30 - 05:45:</strong> 900 ml de água ao acordar (misturar Creatina + Arginina)</li>
+                <li><strong>07:45 - 08:00:</strong> 300 ml de água (durante o treino)</li>
+                <li><strong>10:00 - 10:15:</strong> 500 ml de água (Garrafa 1 - Metade da Manhã)</li>
+                <li><strong>11:30 - 11:45:</strong> 500 ml de água (Garrafa 1 - Final da Manhã)</li>
+                <li><strong>14:30 - 14:45:</strong> 500 ml de água (Garrafa 2 - Início da Tarde)</li>
+                <li><strong>16:00 - 16:15:</strong> 500 ml de água (Garrafa 2 - Final da Tarde)</li>
+                <li><strong>19:30 - 19:45:</strong> 500 ml de água (Início da Noite)</li>
             </ul>
         </div>
     </div>
 
-    <!-- Navegação por Abas -->
-    <div class="nav-tabs">
-        <button class="tab-btn" data-day="segunda" onclick="switchTab('segunda', this)">Segunda</button>
-        <button class="tab-btn" data-day="terca" onclick="switchTab('terca', this)">Terça</button>
-        <button class="tab-btn" data-day="quarta" onclick="switchTab('quarta', this)">Quarta</button>
-        <button class="tab-btn" data-day="quinta" onclick="switchTab('quinta', this)">Quinta</button>
-        <button class="tab-btn" data-day="sexta" onclick="switchTab('sexta', this)">Sexta</button>
-        <button class="tab-btn" data-day="sabado" onclick="switchTab('sabado', this)">Sábado</button>
-        <button class="tab-btn" data-day="domingo" onclick="switchTab('domingo', this)">Domingo</button>
-        <button class="tab-btn" data-day="flexivel" onclick="switchTab('flexivel', this)">Guia Flexível / 80-20</button>
-    </div>
-
-    <!-- SEGUNDA-FEIRA -->
-    <div id="segunda" class="day-section">
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">1. Pré-Treino Imediato</span>
-                <span class="meal-time">05:40</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>900 ml de água + 5g Creatina + 3g Arginina</li>
-                    <li>1 banana média + 1 col. sopa de mel (ou aveia)</li>
-                    <li>1 xícara de café sem açúcar</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">2. Pós-Treino / Café da Manhã</span>
-                <span class="meal-time">08:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>2 fatias de pão de fôrma (ou 1 pão francês sem miolo)</li>
-                    <li>2 ovos inteiros mexidos ou cozidos</li>
-                    <li>1 col. sopa rasa de requeijão cremoso light</li>
-                    <li>1 xícara de café sem açúcar (ou com pingo de leite)</li>
-                </ul>
-                <div class="tip-box">
-                    <strong>Opção Rápida em Shake:</strong> 1 scoop de Whey + 200ml de leite + 1 banana + 30g de aveia.
-                </div>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">3. Almoço</span>
-                <span class="meal-time">12:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>4 col. sopa de arroz branco/integral (100g)</li>
-                    <li>1 concha média de feijão (100g)</li>
-                    <li>140g de peito de frango grelhado ou carne de porco magra</li>
-                    <li>Salada à vontade (alface, tomate, cenoura) + 1 col. chá de azeite</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">4. Lanche da Tarde</span>
-                <span class="meal-time">16:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>1 pão de fôrma com pastinha de frango desfiado com maionese light (ou tapioca com queijo)</li>
-                    <li>1 porção de fruta (1 maçã ou 1 laranja ou 200g de melancia)</li>
-                    <li>1 xícara de café sem açúcar ou chá leão</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">5. Jantar</span>
-                <span class="meal-time">20:00</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>3 col. sopa de arroz + 1 concha pequena de feijão</li>
-                    <li>130g de carne cozida ou carne moída magra</li>
-                    <li>Salada/Verduras (abóbora, brócolis, cenoura) à vontade</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- TERÇA-FEIRA -->
-    <div id="terca" class="day-section">
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">1. Pré-Treino</span>
-                <span class="meal-time">05:40</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>900 ml de água + Creatina + Arginina</li>
-                    <li>1 banana + 15g de aveia + café sem açúcar</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">2. Pós-Treino (Treino Pesado de Perna)</span>
-                <span class="meal-time">08:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>Shake anabólico: 1 scoop de Whey + 200ml de leite + 1 banana + 30g de aveia</li>
-                    <li>OU 2 fatias de pão de fôrma com 2 ovos + requeijão light</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">3. Almoço</span>
-                <span class="meal-time">12:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>150g de mandioca ou batata cozida (substitui o arroz)</li>
-                    <li>1 concha de feijão</li>
-                    <li>140g de carne cozida ou bife magro</li>
-                    <li>Prato grande de salada folhosa</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">4. Lanche da Tarde</span>
-                <span class="meal-time">16:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>Tapioca (40g de massa) recheada com 1 fatia de queijo + 1 ovo ou frango</li>
-                    <li>1 café sem açúcar + 1 maçã</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">5. Jantar</span>
-                <span class="meal-time">20:00</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>Mexido caseiro controlado: 3 col. sopa de arroz, feijão, 130g de carne cozida/moída, legumes picados + 1 col. sopa rasa de farinha.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- QUARTA-FEIRA -->
-    <div id="quarta" class="day-section">
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">1. Pré-Treino (Musculação + Corrida 8km)</span>
-                <span class="meal-time">05:40</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>900 ml de água + Creatina + Arginina</li>
-                    <li>1 banana grande + 1 col. sopa reforçada de mel</li>
-                    <li>Café sem açúcar</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">2. Pós-Treino Reestruturador</span>
-                <span class="meal-time">08:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>2 fatias de pão de fôrma + 2 ovos + requeijão light</li>
-                    <li>1 fatia grande de mamão ou 200g de melão/melancia</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">3. Almoço</span>
-                <span class="meal-time">12:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>5 col. sopa de arroz + 1 concha de feijão</li>
-                    <li>150g de peito de frango em tiras ou carne magra</li>
-                    <li>Salada colorida à vontade</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">4. Lanche da Tarde</span>
-                <span class="meal-time">16:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>1 scoop de Whey com aveia e leite/água OU pão com pastinha de frango</li>
-                    <li>1 laranja ou maçã</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">5. Jantar</span>
-                <span class="meal-time">20:00</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>Macarrão Alho e Óleo (1 pegador/120g cozido) + 2 col. sopa de arroz + 130g de frango/carne</li>
-                    <li>Salada com bastante brócolis ou vegetais verdes</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- QUINTA-FEIRA -->
-    <div id="quinta" class="day-section">
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">1. Pré-Treino (Funcional)</span>
-                <span class="meal-time">05:40</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>900 ml de água + Creatina + Arginina</li>
-                    <li>1 banana + café sem açúcar</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">2. Pós-Treino</span>
-                <span class="meal-time">08:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>1 pão francês sem miolo com pão e ovo + requeijão light</li>
-                    <li>Café com pingo de leite</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">3. Almoço</span>
-                <span class="meal-time">12:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>4 col. sopa de arroz + 1 concha de feijão</li>
-                    <li>140g de bife de porco grelhado ou frango</li>
-                    <li>Abóbora cozida + salada verde à vontade</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">4. Lanche da Tarde</span>
-                <span class="meal-time">16:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>Tapioca com queijo ou pão de fôrma com frango</li>
-                    <li>Café sem açúcar + 1 fatia de melão</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">5. Jantar</span>
-                <span class="meal-time">20:00</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>Pão com carne moída magra (Buraco quente saudável): 1 pão francês + 120g de carne moída com molho natural e salada.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- SEXTA-FEIRA -->
-    <div id="sexta" class="day-section">
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">1. Pré-Treino (Abdominal + Corrida 8km)</span>
-                <span class="meal-time">05:40</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>900 ml de água + Creatina + Arginina</li>
-                    <li>1 banana + 1 col. sopa de mel + café</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">2. Pós-Treino</span>
-                <span class="meal-time">08:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>Shake de Whey com aveia e fruta OU 2 fatias de pão de fôrma + 2 ovos</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">3. Almoço</span>
-                <span class="meal-time">12:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>4 col. sopa de arroz + feijão</li>
-                    <li>140g de proteína magra</li>
-                    <li>Salada completa</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">4. Lanche da Tarde</span>
-                <span class="meal-time">16:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>Pão com ovo/frango ou Tapioca</li>
-                    <li>1 café sem açúcar</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">5. Jantar / Opção Social de Sexta</span>
-                <span class="meal-time">20:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li><strong>Opção Caseira:</strong> Cachorro quente caseiro (1 pão de hot dog, 1 a 2 salsichas cozidas, molho de tomate, vinagrete, pouca batata palha).</li>
-                    <li><strong>Opção Saída/Japonês:</strong> Combo de Sushi (12 a 16 peças focadas em sashimis/niguiris).</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- SÁBADO -->
-    <div id="sabado" class="day-section">
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">1. Manhã (Pré-Vôlei - 2h de jogo)</span>
-                <span class="meal-time">08:00</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>900 ml de água + Creatina + Arginina</li>
-                    <li>2 fatias de pão com ovo e requeijão light ou Shake reforçado</li>
-                    <li>1 banana extra antes de entrar em quadra</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">2. Almoço Pós-Vôlei (Churrasco / Família)</span>
-                <span class="meal-time">13:00</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li><strong>No Churrasco:</strong> 1 pão de alho, 2 a 3 fatias de carnes magras/asinha/linguiça, 2 col. de farofa, vinagrete à vontade.</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">3. Lanche da Tarde</span>
-                <span class="meal-time">17:00</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>1 porção de fruta fresca ou 1 café sem açúcar com biscoito caseiro em porção moderada.</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">4. Jantar / Refeição Livre Controle</span>
-                <span class="meal-time">20:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li><strong>Opção Pizza:</strong> 2 a 3 fatias de pizza.</li>
-                    <li><strong>Opção Hambúrguer:</strong> 1 Hambúrguer artesanal + refrigerante zero.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- DOMINGO -->
-    <div id="domingo" class="day-section">
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">1. Pré-Longão de Corrida (10 a 18km)</span>
-                <span class="meal-time">06:00</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>900 ml de água + Creatina + Arginina</li>
-                    <li>2 fatias de pão de fôrma com geleia/mel ou 1 banana grande reforçada</li>
-                    <li>1 xícara de café sem açúcar</li>
-                </ul>
-                <div class="warning-box">
-                    <strong>Alerta App / Longão:</strong> Acima de 12km, consumir 1 sachê de gel de carboidrato ou 300ml de bebida isotônica na metade do percurso.
-                </div>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">2. Pós-Longão</span>
-                <span class="meal-time">09:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>Shake de Whey com leite, banana e aveia OU Pão com ovos reforçado + copo de suco natural sem açúcar.</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">3. Almoço de Domingo</span>
-                <span class="meal-time">13:00</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>Arroz, feijão com bacon/calabresa em porção moderada, salada e proteína magra.</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="meal-card">
-            <div class="meal-header">
-                <span class="meal-title">4. Jantar</span>
-                <span class="meal-time">19:30</span>
-            </div>
-            <div class="meal-content">
-                <ul>
-                    <li>Sopa de legumes com frango/carne moída ou Mexido leve com pouca gordura.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- GUIA FLEXÍVEL 80/20 -->
-    <div id="flexivel" class="day-section">
-        <div class="substitutions-grid">
-            <div class="sub-card">
-                <div class="sub-title">🍺 Cerveja / Álcool no Fim de Semana</div>
-                <ul style="font-size:0.85rem; padding-left:16px;">
-                    <li>Mantenha a meta de água elevada antes do evento.</li>
-                    <li>Intercale cada copo de cerveja com 1 copo de água pura.</li>
-                    <li>Se beber mais de 4 latões, reduza o carboidrato do jantar do mesmo dia.</li>
-                </ul>
-            </div>
-
-            <div class="sub-card">
-                <div class="sub-title">🔄 Substituições Rápidas de Carbs</div>
-                <ul style="font-size:0.85rem; padding-left:16px;">
-                    <li><strong>Arroz (4 col. sopa):</strong> 120g Batata cozida / 100g Mandioca / 100g Macarrão.</li>
-                    <li><strong>Peito de Frango (140g):</strong> 140g Carne moída / 150g Peixe / 130g Bife de Porco / 4 Ovos.</li>
-                    <li><strong>Pão de Fôrma (2 fatias):</strong> 1 Pão Francês sem miolo / 1 Tapioca média (40g).</li>
-                </ul>
-            </div>
-        </div>
     </div>
 
     <div class="footer-note">

@@ -5,23 +5,18 @@ console.log("Aplicativo carregado com sucesso.");
 // SERVICE WORKER
 // ======================================================
 
+const ambienteLocal =
+    location.hostname === "127.0.0.1" ||
+    location.hostname === "localhost";
+
 if ("serviceWorker" in navigator) {
-
-    const ambienteLocal =
-        location.hostname === "127.0.0.1" ||
-        location.hostname === "localhost";
-
 
     if (ambienteLocal) {
 
-        // Durante o desenvolvimento local,
-        // remove Service Workers antigos para evitar
-        // que arquivos em cache atrapalhem os testes.
-
+        // No localhost, evita cache durante o desenvolvimento.
         navigator.serviceWorker
             .getRegistrations()
             .then(registrations => {
-
                 registrations.forEach(registration => {
                     registration.unregister();
                 });
@@ -31,41 +26,28 @@ if ("serviceWorker" in navigator) {
                 );
             });
 
-
-        // Limpa caches antigos no localhost.
         if ("caches" in window) {
-
             caches.keys().then(cacheNames => {
-
                 cacheNames.forEach(cacheName => {
                     caches.delete(cacheName);
                 });
-
             });
         }
 
-
     } else {
-
-        // Em produção, como GitHub Pages,
-        // o Service Worker continua funcionando.
 
         navigator.serviceWorker
             .register("./service-worker.js")
             .then(() => {
-
                 console.log(
                     "Service Worker registrado com sucesso."
                 );
-
             })
             .catch(error => {
-
                 console.error(
                     "Erro ao registrar Service Worker:",
                     error
                 );
-
             });
     }
 }
@@ -95,14 +77,72 @@ const NOMES_DIAS = [
     "Sábado"
 ];
 
+const DURACAO_REFEICAO_MIN = 30;
+const DURACAO_HIDRATACAO_MIN = 15;
+const ANTECEDENCIA_MIN = 5;
+const AVISO_FIM_MIN = 5;
+
 let ultimoDiaDetectado = null;
+
+
+// ======================================================
+// DADOS DE HIDRATAÇÃO
+// ======================================================
+
+const LEMBRETES_HIDRATACAO = [
+    {
+        horario: "05:30",
+        descricao: "900 ml de água ao acordar (Creatina + Arginina)"
+    },
+    {
+        horario: "07:45",
+        descricao: "300 ml de água durante o treino"
+    },
+    {
+        horario: "10:00",
+        descricao: "500 ml de água (Garrafa 1 - Metade da Manhã)"
+    },
+    {
+        horario: "11:30",
+        descricao: "500 ml de água (Garrafa 1 - Final da Manhã)"
+    },
+    {
+        horario: "14:30",
+        descricao: "500 ml de água (Garrafa 2 - Início da Tarde)"
+    },
+    {
+        horario: "16:00",
+        descricao: "500 ml de água (Garrafa 2 - Final da Tarde)"
+    },
+    {
+        horario: "19:30",
+        descricao: "500 ml de água (Início da Noite)"
+    }
+];
 
 
 // ======================================================
 // FUNÇÕES AUXILIARES
 // ======================================================
 
-function formatarTempoRestante(dataFutura) {
+function formatarHorario(data) {
+    return data.toLocaleTimeString(
+        "pt-BR",
+        {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        }
+    );
+}
+
+
+function formatarPeriodo(inicio, fim) {
+    return `${formatarHorario(inicio)} - ${formatarHorario(fim)}`;
+}
+
+
+function formatarTempoRestante(dataFutura, prefixo = "Faltam") {
 
     const agora = new Date();
 
@@ -114,7 +154,7 @@ function formatarTempoRestante(dataFutura) {
     }
 
     const minutosTotais =
-        Math.floor(diferenca / 60000);
+        Math.ceil(diferenca / 60000);
 
     const horas =
         Math.floor(minutosTotais / 60);
@@ -123,10 +163,10 @@ function formatarTempoRestante(dataFutura) {
         minutosTotais % 60;
 
     if (horas > 0) {
-        return `Faltam ${horas}h ${minutos}min`;
+        return `${prefixo} ${horas}h ${minutos}min`;
     }
 
-    return `Faltam ${minutos} min`;
+    return `${prefixo} ${minutos} min`;
 }
 
 
@@ -139,11 +179,8 @@ function criarDataComHorario(dataBase, horario) {
         return null;
     }
 
-    const hora =
-        Number(partes[0]);
-
-    const minuto =
-        Number(partes[1]);
+    const hora = Number(partes[0]);
+    const minuto = Number(partes[1]);
 
     if (
         Number.isNaN(hora) ||
@@ -166,6 +203,19 @@ function criarDataComHorario(dataBase, horario) {
 }
 
 
+function adicionarMinutos(data, minutos) {
+
+    const resultado =
+        new Date(data);
+
+    resultado.setMinutes(
+        resultado.getMinutes() + minutos
+    );
+
+    return resultado;
+}
+
+
 function obterDataDoDia(offsetDias = 0) {
 
     const data =
@@ -183,6 +233,84 @@ function obterDataDoDia(offsetDias = 0) {
     );
 
     return data;
+}
+
+
+function nomeRelativoDia(data, offset) {
+
+    if (offset === 0) {
+        return "";
+    }
+
+    if (offset === 1) {
+        return "Amanhã • ";
+    }
+
+    return `${NOMES_DIAS[data.getDay()]} • `;
+}
+
+
+function obterConteudoRefeicao(card) {
+
+    if (!card) {
+        return "";
+    }
+
+    const itens =
+        Array.from(
+            card.querySelectorAll(".meal-content li")
+        )
+            .map(item => item.textContent.trim())
+            .filter(Boolean);
+
+    return itens.join(" • ");
+}
+
+
+function criarChaveNotificacao(
+    tipo,
+    momento,
+    dataReferencia,
+    identificador
+) {
+
+    const ano =
+        dataReferencia.getFullYear();
+
+    const mes =
+        String(
+            dataReferencia.getMonth() + 1
+        ).padStart(2, "0");
+
+    const dia =
+        String(
+            dataReferencia.getDate()
+        ).padStart(2, "0");
+
+    return [
+        "notif",
+        ano,
+        mes,
+        dia,
+        tipo,
+        momento,
+        identificador
+    ].join(":");
+}
+
+
+function estaNoMinutoAlvo(alvo) {
+
+    const agora =
+        new Date();
+
+    const diferenca =
+        agora.getTime() - alvo.getTime();
+
+    return (
+        diferenca >= 0 &&
+        diferenca < 60000
+    );
 }
 
 
@@ -289,49 +417,42 @@ function atualizarMacrosDoDia() {
         new Date().getDay();
 
     const metas = {
-
         0: {
             calorias: "2.400 kcal",
             proteina: "150g",
             carbo: "280g",
             gordura: "60g"
         },
-
         1: {
             calorias: "2.000 kcal",
             proteina: "150g",
             carbo: "210g",
             gordura: "55g"
         },
-
         2: {
             calorias: "2.000 kcal",
             proteina: "150g",
             carbo: "210g",
             gordura: "55g"
         },
-
         3: {
             calorias: "2.150 kcal",
             proteina: "150g",
             carbo: "240g",
             gordura: "55g"
         },
-
         4: {
             calorias: "2.000 kcal",
             proteina: "150g",
             carbo: "210g",
             gordura: "55g"
         },
-
         5: {
             calorias: "2.150 kcal",
             proteina: "150g",
             carbo: "240g",
             gordura: "55g"
         },
-
         6: {
             calorias: "2.300 kcal",
             proteina: "140g",
@@ -343,24 +464,20 @@ function atualizarMacrosDoDia() {
     const metaHoje =
         metas[hoje];
 
-
     document.getElementById(
         "macro-calorias"
     ).textContent =
         metaHoje.calorias;
-
 
     document.getElementById(
         "macro-proteina"
     ).textContent =
         metaHoje.proteina;
 
-
     document.getElementById(
         "macro-carbo"
     ).textContent =
         metaHoje.carbo;
-
 
     document.getElementById(
         "macro-gordura"
@@ -370,7 +487,7 @@ function atualizarMacrosDoDia() {
 
 
 // ======================================================
-// PRÓXIMA REFEIÇÃO
+// REFEIÇÕES E PERÍODOS
 // ======================================================
 
 function obterRefeicoesDoDia(
@@ -390,15 +507,12 @@ function obterRefeicoesDoDia(
         return [];
     }
 
-
     const cards =
         secaoDoDia.querySelectorAll(
             ".meal-card"
         );
 
-    const refeicoes =
-        [];
-
+    const refeicoes = [];
 
     cards.forEach(card => {
 
@@ -412,7 +526,6 @@ function obterRefeicoesDoDia(
                 ".meal-time"
             );
 
-
         if (
             !titulo ||
             !horario
@@ -420,34 +533,34 @@ function obterRefeicoesDoDia(
             return;
         }
 
+        const horarioInicio =
+            horario.dataset.start ||
+            (
+                horario.textContent
+                    .match(/\d{2}:\d{2}/) || []
+            )[0];
 
-        const horarioTexto =
-            horario.textContent.trim();
-
-
-        if (
-            !/^\d{2}:\d{2}$/.test(
-                horarioTexto
-            )
-        ) {
+        if (!horarioInicio) {
             return;
         }
 
-
-        const dataRefeicao =
+        const inicio =
             criarDataComHorario(
                 dataBase,
-                horarioTexto
+                horarioInicio
             );
 
-
-        if (!dataRefeicao) {
+        if (!inicio) {
             return;
         }
 
+        const fim =
+            adicionarMinutos(
+                inicio,
+                DURACAO_REFEICAO_MIN
+            );
 
         refeicoes.push({
-
             titulo:
                 titulo.textContent
                     .replace(
@@ -456,17 +569,26 @@ function obterRefeicoesDoDia(
                     )
                     .trim(),
 
-            horario:
-                horarioTexto,
+            inicio,
+            fim,
+            horarioInicio,
+            horarioFim:
+                formatarHorario(fim),
 
-            data:
-                dataRefeicao,
+            periodo:
+                formatarPeriodo(
+                    inicio,
+                    fim
+                ),
 
-            card:
-                card
+            conteudo:
+                obterConteudoRefeicao(
+                    card
+                ),
+
+            card
         });
     });
-
 
     return refeicoes;
 }
@@ -477,28 +599,21 @@ function atualizarProximaRefeicao() {
     const agora =
         new Date();
 
-
     document
         .querySelectorAll(
             ".meal-card"
         )
         .forEach(card => {
-
             card.classList.remove(
-                "next-meal-highlight"
+                "next-meal-highlight",
+                "current-meal-highlight"
             );
         });
 
+    let refeicaoAtual = null;
+    let proximaRefeicao = null;
+    let diasAFrente = 0;
 
-    let proximaRefeicao =
-        null;
-
-    let diasAFrente =
-        0;
-
-
-    // Procura hoje e, se necessário,
-    // nos próximos 7 dias.
     for (
         let offset = 0;
         offset <= 7;
@@ -510,10 +625,8 @@ function atualizarProximaRefeicao() {
                 offset
             );
 
-
         const numeroDia =
             dataBase.getDay();
-
 
         const refeicoes =
             obterRefeicoesDoDia(
@@ -521,32 +634,38 @@ function atualizarProximaRefeicao() {
                 dataBase
             );
 
+        if (offset === 0) {
 
-        for (
-            const refeicao
-            of refeicoes
-        ) {
+            refeicaoAtual =
+                refeicoes.find(
+                    refeicao =>
+                        agora >= refeicao.inicio &&
+                        agora < refeicao.fim
+                ) || null;
 
-            if (
-                refeicao.data > agora
-            ) {
-
-                proximaRefeicao =
-                    refeicao;
-
-                diasAFrente =
-                    offset;
-
+            if (refeicaoAtual) {
                 break;
             }
         }
 
+        proximaRefeicao =
+            refeicoes.find(
+                refeicao =>
+                    refeicao.inicio > agora
+            ) || null;
 
         if (proximaRefeicao) {
+            diasAFrente =
+                offset;
+
             break;
         }
     }
 
+    const labelElemento =
+        document.getElementById(
+            "next-meal-label"
+        );
 
     const nomeElemento =
         document.getElementById(
@@ -563,8 +682,8 @@ function atualizarProximaRefeicao() {
             "next-meal-countdown"
         );
 
-
     if (
+        !labelElemento ||
         !nomeElemento ||
         !horarioElemento ||
         !countdownElemento
@@ -572,8 +691,36 @@ function atualizarProximaRefeicao() {
         return;
     }
 
+    if (refeicaoAtual) {
+
+        labelElemento.textContent =
+            "Período de alimentação atual";
+
+        nomeElemento.textContent =
+            refeicaoAtual.titulo;
+
+        horarioElemento.textContent =
+            refeicaoAtual.periodo;
+
+        countdownElemento.textContent =
+            formatarTempoRestante(
+                refeicaoAtual.fim,
+                "Termina em"
+            );
+
+        refeicaoAtual.card
+            .classList
+            .add(
+                "current-meal-highlight"
+            );
+
+        return;
+    }
 
     if (!proximaRefeicao) {
+
+        labelElemento.textContent =
+            "Próxima refeição";
 
         nomeElemento.textContent =
             "Nenhuma refeição encontrada";
@@ -587,50 +734,28 @@ function atualizarProximaRefeicao() {
         return;
     }
 
+    const prefixo =
+        nomeRelativoDia(
+            proximaRefeicao.inicio,
+            diasAFrente
+        );
 
-    let prefixo =
-        "";
-
-
-    if (diasAFrente === 1) {
-
-        prefixo =
-            "Amanhã • ";
-
-    } else if (
-        diasAFrente > 1
-    ) {
-
-        const numeroDia =
-            proximaRefeicao
-                .data
-                .getDay();
-
-        prefixo =
-            `${NOMES_DIAS[numeroDia]} • `;
-    }
-
+    labelElemento.textContent =
+        "Próxima refeição";
 
     nomeElemento.textContent =
         prefixo +
         proximaRefeicao.titulo;
 
-
     horarioElemento.textContent =
-        proximaRefeicao.horario;
-
+        proximaRefeicao.periodo;
 
     countdownElemento.textContent =
         formatarTempoRestante(
-            proximaRefeicao.data
+            proximaRefeicao.inicio
         );
 
-
-    // Destaca o card correspondente.
-    // Se for amanhã, ele ficará destacado
-    // quando o usuário abrir a aba daquele dia.
-    proximaRefeicao
-        .card
+    proximaRefeicao.card
         .classList
         .add(
             "next-meal-highlight"
@@ -639,71 +764,44 @@ function atualizarProximaRefeicao() {
 
 
 // ======================================================
-// PRÓXIMA HIDRATAÇÃO
+// HIDRATAÇÃO E PERÍODOS
 // ======================================================
 
 function obterLembretesHidratacao(
     dataBase
 ) {
 
-    const lembretes = [
+    return LEMBRETES_HIDRATACAO
+        .map(lembrete => {
 
-        {
-            horario: "05:30",
-            descricao:
-                "900 ml de água ao acordar"
-        },
-
-        {
-            horario: "07:45",
-            descricao:
-                "300 ml de água durante o treino"
-        },
-
-        {
-            horario: "10:00",
-            descricao:
-                "500 ml de água"
-        },
-
-        {
-            horario: "11:30",
-            descricao:
-                "500 ml de água"
-        },
-
-        {
-            horario: "14:30",
-            descricao:
-                "500 ml de água"
-        },
-
-        {
-            horario: "16:00",
-            descricao:
-                "500 ml de água"
-        },
-
-        {
-            horario: "19:30",
-            descricao:
-                "500 ml de água"
-        }
-    ];
-
-
-    return lembretes.map(
-        lembrete => ({
-
-            ...lembrete,
-
-            data:
+            const inicio =
                 criarDataComHorario(
                     dataBase,
                     lembrete.horario
-                )
+                );
+
+            if (!inicio) {
+                return null;
+            }
+
+            const fim =
+                adicionarMinutos(
+                    inicio,
+                    DURACAO_HIDRATACAO_MIN
+                );
+
+            return {
+                ...lembrete,
+                inicio,
+                fim,
+                periodo:
+                    formatarPeriodo(
+                        inicio,
+                        fim
+                    )
+            };
         })
-    );
+        .filter(Boolean);
 }
 
 
@@ -712,14 +810,10 @@ function atualizarProximaHidratacao() {
     const agora =
         new Date();
 
-    let proximaHidratacao =
-        null;
+    let hidratacaoAtual = null;
+    let proximaHidratacao = null;
+    let diasAFrente = 0;
 
-    let diasAFrente =
-        0;
-
-
-    // Hoje ou próximos dias.
     for (
         let offset = 0;
         offset <= 7;
@@ -731,38 +825,43 @@ function atualizarProximaHidratacao() {
                 offset
             );
 
-
         const lembretes =
             obterLembretesHidratacao(
                 dataBase
             );
 
+        if (offset === 0) {
 
-        for (
-            const lembrete
-            of lembretes
-        ) {
+            hidratacaoAtual =
+                lembretes.find(
+                    item =>
+                        agora >= item.inicio &&
+                        agora < item.fim
+                ) || null;
 
-            if (
-                lembrete.data > agora
-            ) {
-
-                proximaHidratacao =
-                    lembrete;
-
-                diasAFrente =
-                    offset;
-
+            if (hidratacaoAtual) {
                 break;
             }
         }
 
+        proximaHidratacao =
+            lembretes.find(
+                item =>
+                    item.inicio > agora
+            ) || null;
 
         if (proximaHidratacao) {
+            diasAFrente =
+                offset;
+
             break;
         }
     }
 
+    const labelElemento =
+        document.getElementById(
+            "next-water-label"
+        );
 
     const nomeElemento =
         document.getElementById(
@@ -779,8 +878,8 @@ function atualizarProximaHidratacao() {
             "next-water-countdown"
         );
 
-
     if (
+        !labelElemento ||
         !nomeElemento ||
         !horarioElemento ||
         !countdownElemento
@@ -788,8 +887,30 @@ function atualizarProximaHidratacao() {
         return;
     }
 
+    if (hidratacaoAtual) {
+
+        labelElemento.textContent =
+            "Período de hidratação atual";
+
+        nomeElemento.textContent =
+            hidratacaoAtual.descricao;
+
+        horarioElemento.textContent =
+            hidratacaoAtual.periodo;
+
+        countdownElemento.textContent =
+            formatarTempoRestante(
+                hidratacaoAtual.fim,
+                "Termina em"
+            );
+
+        return;
+    }
 
     if (!proximaHidratacao) {
+
+        labelElemento.textContent =
+            "Próxima hidratação";
 
         nomeElemento.textContent =
             "Nenhum lembrete encontrado";
@@ -803,42 +924,25 @@ function atualizarProximaHidratacao() {
         return;
     }
 
+    const prefixo =
+        nomeRelativoDia(
+            proximaHidratacao.inicio,
+            diasAFrente
+        );
 
-    let prefixo =
-        "";
-
-
-    if (diasAFrente === 1) {
-
-        prefixo =
-            "Amanhã • ";
-
-    } else if (
-        diasAFrente > 1
-    ) {
-
-        const numeroDia =
-            proximaHidratacao
-                .data
-                .getDay();
-
-        prefixo =
-            `${NOMES_DIAS[numeroDia]} • `;
-    }
-
+    labelElemento.textContent =
+        "Próxima hidratação";
 
     nomeElemento.textContent =
         prefixo +
         proximaHidratacao.descricao;
 
-
     horarioElemento.textContent =
-        proximaHidratacao.horario;
-
+        proximaHidratacao.periodo;
 
     countdownElemento.textContent =
         formatarTempoRestante(
-            proximaHidratacao.data
+            proximaHidratacao.inicio
         );
 }
 
@@ -852,17 +956,14 @@ function verificarMudancaDeDia() {
     const diaAtual =
         new Date().getDay();
 
-
     if (
         ultimoDiaDetectado === null
     ) {
-
         ultimoDiaDetectado =
             diaAtual;
 
         return;
     }
-
 
     if (
         diaAtual !==
@@ -873,23 +974,19 @@ function verificarMudancaDeDia() {
             "Novo dia detectado."
         );
 
-
         ultimoDiaDetectado =
             diaAtual;
 
-
         abrirDiaAtual();
-
         atualizarMacrosDoDia();
-
         atualizarProximaRefeicao();
-
         atualizarProximaHidratacao();
     }
 }
 
+
 // ======================================================
-// NOTIFICAÇÕES
+// PERMISSÃO E EXIBIÇÃO DE NOTIFICAÇÕES
 // ======================================================
 
 function atualizarStatusNotificacoes() {
@@ -911,7 +1008,6 @@ function atualizarStatusNotificacoes() {
         return;
     }
 
-
     if (
         !("Notification" in window)
     ) {
@@ -923,7 +1019,6 @@ function atualizarStatusNotificacoes() {
 
         return;
     }
-
 
     if (
         Notification.permission ===
@@ -941,7 +1036,6 @@ function atualizarStatusNotificacoes() {
         return;
     }
 
-
     if (
         Notification.permission ===
         "denied"
@@ -958,12 +1052,74 @@ function atualizarStatusNotificacoes() {
         return;
     }
 
-
     statusElemento.textContent =
         "Não ativadas";
 
     botao.textContent =
         "Ativar notificações";
+
+    botao.disabled = false;
+}
+
+
+async function exibirNotificacao(
+    titulo,
+    corpo,
+    tag
+) {
+
+    if (
+        !("Notification" in window) ||
+        Notification.permission !==
+        "granted"
+    ) {
+        return;
+    }
+
+    try {
+
+        if (
+            ambienteLocal ||
+            !("serviceWorker" in navigator)
+        ) {
+
+            new Notification(
+                titulo,
+                {
+                    body: corpo,
+                    icon:
+                        "./icons/icon-192.png",
+                    tag
+                }
+            );
+
+            return;
+        }
+
+        const registro =
+            await navigator
+                .serviceWorker
+                .ready;
+
+        await registro.showNotification(
+            titulo,
+            {
+                body: corpo,
+                icon:
+                    "./icons/icon-192.png",
+                badge:
+                    "./icons/icon-192.png",
+                tag
+            }
+        );
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao exibir notificação:",
+            erro
+        );
+    }
 }
 
 
@@ -980,23 +1136,24 @@ async function solicitarPermissaoNotificacoes() {
         return;
     }
 
-
     try {
 
         const permissao =
-            await Notification.requestPermission();
-
+            await Notification
+                .requestPermission();
 
         atualizarStatusNotificacoes();
-
 
         if (
             permissao ===
             "granted"
         ) {
 
-            await enviarNotificacaoTeste();
-
+            await exibirNotificacao(
+                "Meu Plano Alimentar",
+                "Notificações ativadas com sucesso ✅",
+                "teste-notificacao"
+            );
         }
 
     } catch (erro) {
@@ -1005,54 +1162,6 @@ async function solicitarPermissaoNotificacoes() {
             "Erro ao solicitar permissão:",
             erro
         );
-
-    }
-}
-
-
-async function enviarNotificacaoTeste() {
-
-    if (
-        Notification.permission !==
-        "granted"
-    ) {
-        return;
-    }
-
-
-    try {
-
-        const registro =
-            await navigator
-                .serviceWorker
-                .ready;
-
-
-        await registro.showNotification(
-            "Meu Plano Alimentar",
-            {
-                body:
-                    "Notificações ativadas com sucesso ✅",
-
-                icon:
-                    "./icons/icon-192.png",
-
-                badge:
-                    "./icons/icon-192.png",
-
-                tag:
-                    "teste-notificacao"
-            }
-        );
-
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao enviar notificação:",
-            erro
-        );
-
     }
 }
 
@@ -1064,20 +1173,256 @@ function configurarBotaoNotificacoes() {
             "enable-notifications"
         );
 
-
     if (!botao) {
         return;
     }
-
 
     botao.addEventListener(
         "click",
         solicitarPermissaoNotificacoes
     );
 
-
     atualizarStatusNotificacoes();
 }
+
+
+// ======================================================
+// NOTIFICAÇÕES DE REFEIÇÃO E HIDRATAÇÃO
+// enquanto o app estiver ativo.
+// O Web Push em segundo plano entra na próxima etapa.
+// ======================================================
+
+async function enviarNotificacaoUmaVez(
+    chave,
+    titulo,
+    corpo
+) {
+
+    if (
+        localStorage.getItem(chave)
+    ) {
+        return;
+    }
+
+    await exibirNotificacao(
+        titulo,
+        corpo,
+        chave
+    );
+
+    localStorage.setItem(
+        chave,
+        "1"
+    );
+}
+
+
+async function verificarNotificacoesRefeicoes() {
+
+    if (
+        !("Notification" in window) ||
+        Notification.permission !==
+        "granted"
+    ) {
+        return;
+    }
+
+    const hoje =
+        obterDataDoDia(0);
+
+    const numeroDia =
+        hoje.getDay();
+
+    const refeicoes =
+        obterRefeicoesDoDia(
+            numeroDia,
+            hoje
+        );
+
+    for (
+        const refeicao
+        of refeicoes
+    ) {
+
+        const cincoAntesInicio =
+            adicionarMinutos(
+                refeicao.inicio,
+                -ANTECEDENCIA_MIN
+            );
+
+        const cincoAntesFim =
+            adicionarMinutos(
+                refeicao.fim,
+                -AVISO_FIM_MIN
+            );
+
+        const idBase =
+            `${numeroDia}-${refeicao.horarioInicio}-${refeicao.titulo}`;
+
+        if (
+            estaNoMinutoAlvo(
+                cincoAntesInicio
+            )
+        ) {
+
+            await enviarNotificacaoUmaVez(
+                criarChaveNotificacao(
+                    "refeicao",
+                    "pre-inicio",
+                    refeicao.inicio,
+                    idBase
+                ),
+                "🍽️ Sua próxima refeição está chegando",
+                `${refeicao.titulo} começa em 5 minutos, às ${refeicao.horarioInicio}.`
+            );
+        }
+
+        if (
+            estaNoMinutoAlvo(
+                refeicao.inicio
+            )
+        ) {
+
+            const conteudo =
+                refeicao.conteudo
+                    ? ` O que ingerir: ${refeicao.conteudo}`
+                    : "";
+
+            await enviarNotificacaoUmaVez(
+                criarChaveNotificacao(
+                    "refeicao",
+                    "inicio",
+                    refeicao.inicio,
+                    idBase
+                ),
+                "🍽️ Seu período de alimentação começou",
+                `${refeicao.titulo} • ${refeicao.periodo}.${conteudo}`
+            );
+        }
+
+        if (
+            estaNoMinutoAlvo(
+                cincoAntesFim
+            )
+        ) {
+
+            await enviarNotificacaoUmaVez(
+                criarChaveNotificacao(
+                    "refeicao",
+                    "pre-fim",
+                    refeicao.inicio,
+                    idBase
+                ),
+                "⏳ Seu período de alimentação está terminando",
+                `${refeicao.titulo}: faltam 5 minutos para o período acabar.`
+            );
+        }
+    }
+}
+
+
+async function verificarNotificacoesHidratacao() {
+
+    if (
+        !("Notification" in window) ||
+        Notification.permission !==
+        "granted"
+    ) {
+        return;
+    }
+
+    const hoje =
+        obterDataDoDia(0);
+
+    const lembretes =
+        obterLembretesHidratacao(
+            hoje
+        );
+
+    for (
+        const item
+        of lembretes
+    ) {
+
+        const cincoAntesInicio =
+            adicionarMinutos(
+                item.inicio,
+                -ANTECEDENCIA_MIN
+            );
+
+        const cincoAntesFim =
+            adicionarMinutos(
+                item.fim,
+                -AVISO_FIM_MIN
+            );
+
+        const idBase =
+            `${item.horario}-${item.descricao}`;
+
+        if (
+            estaNoMinutoAlvo(
+                cincoAntesInicio
+            )
+        ) {
+
+            await enviarNotificacaoUmaVez(
+                criarChaveNotificacao(
+                    "hidratacao",
+                    "pre-inicio",
+                    item.inicio,
+                    idBase
+                ),
+                "💧 Sua próxima hidratação está chegando",
+                `Seu próximo período de hidratação começa em 5 minutos, às ${item.horario}.`
+            );
+        }
+
+        if (
+            estaNoMinutoAlvo(
+                item.inicio
+            )
+        ) {
+
+            await enviarNotificacaoUmaVez(
+                criarChaveNotificacao(
+                    "hidratacao",
+                    "inicio",
+                    item.inicio,
+                    idBase
+                ),
+                "💧 Seu período de hidratação começou",
+                `${item.periodo}. O que ingerir: ${item.descricao}.`
+            );
+        }
+
+        if (
+            estaNoMinutoAlvo(
+                cincoAntesFim
+            )
+        ) {
+
+            await enviarNotificacaoUmaVez(
+                criarChaveNotificacao(
+                    "hidratacao",
+                    "pre-fim",
+                    item.inicio,
+                    idBase
+                ),
+                "⏳ Seu período de hidratação está terminando",
+                "Faltam 5 minutos para o período de hidratação acabar."
+            );
+        }
+    }
+}
+
+
+async function verificarNotificacoesAgendadas() {
+
+    await verificarNotificacoesRefeicoes();
+
+    await verificarNotificacoesHidratacao();
+}
+
 
 // ======================================================
 // INICIALIZAÇÃO DO APP
@@ -1096,6 +1441,8 @@ document.addEventListener(
         atualizarProximaHidratacao();
 
         configurarBotaoNotificacoes();
+
+        verificarNotificacoesAgendadas();
     }
 );
 
@@ -1113,6 +1460,8 @@ setInterval(
 
         atualizarProximaHidratacao();
 
+        verificarNotificacoesAgendadas();
+
     },
-    60000
+    30000
 );
