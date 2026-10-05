@@ -1,34 +1,1122 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Meu Plano Alimentar</title>
-
-    <link rel="stylesheet" href="css/style.css">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Alta Performance & Definição - 8 Semanas</title>
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e293b">
+    <style>
+        :root {
+            --primary: #1e293b;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --warning: #d97706;
+            --water: #0284c7;
+        }
 
-    <meta name="theme-color" content="#ffffff">
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 12px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0 0 6px 0;
+            font-size: 1.4rem;
+        }
+
+        header p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-card .val {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #38bdf8;
+        }
+
+        .metric-card .lbl {
+            font-size: 0.7rem;
+            color: #cbd5e1;
+        }
+
+        /* Tabela de Macros e Metas */
+        .macro-table-container {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .macro-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            text-align: left;
+            margin-top: 8px;
+        }
+
+        .macro-table th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+            padding: 6px 8px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .macro-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .day-section {
+            display: none;
+        }
+
+        .day-section.active {
+            display: block;
+        }
+
+        .meal-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .meal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .meal-title {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        .meal-time {
+            font-size: 0.8rem;
+            background: #eff6ff;
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .water-card {
+            background: #f0f9ff;
+            border-left: 4px solid var(--water);
+        }
+
+        .water-title {
+            color: #0369a1;
+        }
+
+        .meal-content {
+            font-size: 0.88rem;
+        }
+
+        .meal-content ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .meal-content li {
+            margin-bottom: 4px;
+        }
+
+        .tip-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid var(--success);
+            padding: 8px 10px;
+            font-size: 0.82rem;
+            color: #166534;
+            border-radius: 0 6px 6px 0;
+            margin-top: 8px;
+        }
+
+        .warning-box {
+            background-color: #fffbeb;
+            border-left: 4px solid var(--warning);
+            padding: 8px 10px;
+            font-size: 0.82rem;
+            color: #92400e;
+            border-radius: 0 6px 6px 0;
+            margin-top: 8px;
+        }
+
+        .substitutions-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        @media (min-width: 600px) {
+            .substitutions-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .sub-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .sub-title {
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-light);
+            margin-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        .daily-macros {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .daily-macros-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+        }
+
+        .daily-macros-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .daily-macros-grid div {
+            background: rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .daily-macros-grid span {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+
+        .daily-macros-grid small {
+            display: block;
+            margin-top: 2px;
+            font-size: 0.65rem;
+            color: #cbd5e1;
+        }
+
+        .next-meal-card {
+            margin-top: 14px;
+            background: #ffffff;
+            color: var(--text);
+            border-radius: 10px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+        }
+
+        .next-meal-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .next-meal-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .next-meal-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .next-meal-time {
+            margin-top: 2px;
+            font-size: 0.8rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .next-meal-countdown {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--success);
+            text-align: right;
+        }
+
+        .meal-card.next-meal-highlight {
+            border: 2px solid var(--accent);
+            background: #eff6ff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+        }
+
+        .meal-card.next-meal-highlight::before {
+            content: "PRÓXIMA REFEIÇÃO";
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: var(--accent);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+        .next-water-card {
+            margin-top: 10px;
+            background: #f0f9ff;
+            color: var(--text);
+            border-radius: 10px;
+            padding: 12px 14px;
+            border: 1px solid #bae6fd;
+        }
+
+        .next-water-label {
+            font-size: 0.75rem;
+            color: #0369a1;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .next-water-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .next-water-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #075985;
+        }
+
+        .next-water-time {
+            margin-top: 2px;
+            font-size: 0.8rem;
+            color: var(--water);
+            font-weight: 600;
+        }
+
+        .next-water-countdown {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--water);
+            text-align: right;
+        }
+        .notification-settings {
+            margin-top: 12px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .notification-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .notification-status {
+            margin-top: 2px;
+            font-size: 0.72rem;
+            color: #cbd5e1;
+        }
+
+        .notification-button {
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .notification-button:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+    </style>
 </head>
-
 <body>
 
-    <main>
-        <h1>Meu Plano Alimentar</h1>
+<div class="container">
+    <header>
+        <h1>Plano de Nutrição & Configuração do App</h1>
+        <p>Atleta: Felipe Matos de Souza | Duração: 8 Semanas</p>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="val">32 anos</div>
+                <div class="lbl">Idade</div>
+            </div>
+            <div class="metric-card">
+                <div class="val">1,75 m</div>
+                <div class="lbl">Altura</div>
+            </div>
+            <div class="metric-card">
+                <div class="val">72 kg</div>
+                <div class="lbl">Peso Atual</div>
+            </div>
+            <div class="metric-card">
+                <div class="val">14,8%</div>
+                <div class="lbl">BF% Atual</div>
+            </div>
+            <div class="metric-card">
+                <div class="val">10-12%</div>
+                <div class="lbl">Meta de BF%</div>
+            </div>
+            <div class="metric-card">
+                <div class="val">2.550 kcal</div>
+                <div class="lbl">Gasto Diário (TDEE)</div>
+            </div>
+        </div>
 
-        <p>
-            Minha primeira PWA está começando a funcionar.
-        </p>
-    </main>
+        <div id="daily-macros" class="daily-macros">
+            <div id="next-meal-card" class="next-meal-card">
+                <div class="next-meal-label">Próxima refeição</div>
 
-    <script src="js/app.js"></script>
+                <div class="next-meal-main">
+                    <div>
+                        <div id="next-meal-name" class="next-meal-name">--</div>
+                        <div id="next-meal-time" class="next-meal-time">--:--</div>
+                    </div>
+
+                    <div id="next-meal-countdown" class="next-meal-countdown">
+                        --
+                    </div>
+                </div>
+            </div>
+
+            <div id="next-water-card" class="next-water-card">
+            <div class="next-water-label">Próxima hidratação</div>
+
+            <div class="next-water-main">
+                <div>
+                    <div id="next-water-name" class="next-water-name">--</div>
+                    <div id="next-water-time" class="next-water-time">--:--</div>
+                </div>
+
+                <div id="next-water-countdown" class="next-water-countdown">
+                    --
+                </div>
+            </div>
+        </div>
+
+            <div class="daily-macros-title">Meta de hoje</div>
+
+            <div class="daily-macros-grid">
+                <div>
+                    <span id="macro-calorias">--</span>
+                    <small>Calorias</small>
+                </div>
+
+                <div>
+                    <span id="macro-proteina">--</span>
+                    <small>Proteína</small>
+                </div>
+
+                <div>
+                    <span id="macro-carbo">--</span>
+                    <small>Carboidratos</small>
+                </div>
+
+                <div>
+                    <span id="macro-gordura">--</span>
+                    <small>Gorduras</small>
+                </div>
+            </div>
+        </div>
+        <div class="notification-settings">
+            <div>
+                <div class="notification-title">
+                    🔔 Notificações
+                </div>
+
+                <div id="notification-status" class="notification-status">
+                    Não ativadas
+                </div>
+            </div>
+
+            <button
+                id="enable-notifications"
+                class="notification-button"
+                type="button"
+            >
+                Ativar notificações
+            </button>
+        </div>
+
+    </header>
+
+    <!-- Tabela de Metas de Macronutrientes para o App -->
+    <div class="macro-table-container">
+        <strong style="color: var(--primary); font-size: 0.95rem;">🎯 Metas de Macronutrientes por Tipo de Dia (Base App)</strong>
+        <table class="macro-table">
+            <thead>
+                <tr>
+                    <th>Dia / Atividade</th>
+                    <th>Calorias</th>
+                    <th>Proteínas</th>
+                    <th>Carbs</th>
+                    <th>Gorduras</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Seg/Ter/Qui (Musculação/Func)</strong></td>
+                    <td>~2.000 kcal</td>
+                    <td>150g (2,1g/kg)</td>
+                    <td>210g</td>
+                    <td>55g</td>
+                </tr>
+                <tr>
+                    <td><strong>Qua/Sex (Musculação + Corrida 8k)</strong></td>
+                    <td>~2.150 kcal</td>
+                    <td>150g (2,1g/kg)</td>
+                    <td>240g</td>
+                    <td>55g</td>
+                </tr>
+                <tr>
+                    <td><strong>Sábado (Vôlei + Flexível)</strong></td>
+                    <td>~2.300 kcal</td>
+                    <td>140g (1,9g/kg)</td>
+                    <td>240g</td>
+                    <td>70g</td>
+                </tr>
+                <tr>
+                    <td><strong>Domingo (Longão 10-18k)</strong></td>
+                    <td>~2.400 kcal</td>
+                    <td>150g (2,1g/kg)</td>
+                    <td>280g</td>
+                    <td>60g</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Cronograma de Notificação de Hidratação -->
+    <div class="meal-card water-card">
+        <div class="meal-header">
+            <span class="meal-title water-title">💧 Lembretes de Hidratação Diária (Meta: 3,7 Litros)</span>
+            <span class="meal-time" style="background:#e0f2fe; color:#0369a1;">Configurar no App</span>
+        </div>
+        <div class="meal-content">
+            <ul>
+                <li><strong>05:30:</strong> 900 ml de água ao acordar (misturar Creatina + Arginina)</li>
+                <li><strong>07:45 - 08:15:</strong> 300 ml de água (durante o treino)</li>
+                <li><strong>10:00:</strong> 500 ml de água (Garrafa 1 - Metade da Manhã)</li>
+                <li><strong>11:30:</strong> 500 ml de água (Garrafa 1 - Final da Manhã)</li>
+                <li><strong>14:30:</strong> 500 ml de água (Garrafa 2 - Início da Tarde)</li>
+                <li><strong>16:00:</strong> 500 ml de água (Garrafa 2 - Final da Tarde)</li>
+                <li><strong>19:30:</strong> 500 ml de água (Início da Noite)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Navegação por Abas -->
+    <div class="nav-tabs">
+        <button class="tab-btn" data-day="segunda" onclick="switchTab('segunda', this)">Segunda</button>
+        <button class="tab-btn" data-day="terca" onclick="switchTab('terca', this)">Terça</button>
+        <button class="tab-btn" data-day="quarta" onclick="switchTab('quarta', this)">Quarta</button>
+        <button class="tab-btn" data-day="quinta" onclick="switchTab('quinta', this)">Quinta</button>
+        <button class="tab-btn" data-day="sexta" onclick="switchTab('sexta', this)">Sexta</button>
+        <button class="tab-btn" data-day="sabado" onclick="switchTab('sabado', this)">Sábado</button>
+        <button class="tab-btn" data-day="domingo" onclick="switchTab('domingo', this)">Domingo</button>
+        <button class="tab-btn" data-day="flexivel" onclick="switchTab('flexivel', this)">Guia Flexível / 80-20</button>
+    </div>
+
+    <!-- SEGUNDA-FEIRA -->
+    <div id="segunda" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Pré-Treino Imediato</span>
+                <span class="meal-time">05:40</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + 5g Creatina + 3g Arginina</li>
+                    <li>1 banana média + 1 col. sopa de mel (ou aveia)</li>
+                    <li>1 xícara de café sem açúcar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Pós-Treino / Café da Manhã</span>
+                <span class="meal-time">08:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>2 fatias de pão de fôrma (ou 1 pão francês sem miolo)</li>
+                    <li>2 ovos inteiros mexidos ou cozidos</li>
+                    <li>1 col. sopa rasa de requeijão cremoso light</li>
+                    <li>1 xícara de café sem açúcar (ou com pingo de leite)</li>
+                </ul>
+                <div class="tip-box">
+                    <strong>Opção Rápida em Shake:</strong> 1 scoop de Whey + 200ml de leite + 1 banana + 30g de aveia.
+                </div>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Almoço</span>
+                <span class="meal-time">12:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>4 col. sopa de arroz branco/integral (100g)</li>
+                    <li>1 concha média de feijão (100g)</li>
+                    <li>140g de peito de frango grelhado ou carne de porco magra</li>
+                    <li>Salada à vontade (alface, tomate, cenoura) + 1 col. chá de azeite</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Lanche da Tarde</span>
+                <span class="meal-time">16:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>1 pão de fôrma com pastinha de frango desfiado com maionese light (ou tapioca com queijo)</li>
+                    <li>1 porção de fruta (1 maçã ou 1 laranja ou 200g de melancia)</li>
+                    <li>1 xícara de café sem açúcar ou chá leão</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">5. Jantar</span>
+                <span class="meal-time">20:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>3 col. sopa de arroz + 1 concha pequena de feijão</li>
+                    <li>130g de carne cozida ou carne moída magra</li>
+                    <li>Salada/Verduras (abóbora, brócolis, cenoura) à vontade</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- TERÇA-FEIRA -->
+    <div id="terca" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Pré-Treino</span>
+                <span class="meal-time">05:40</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + Creatina + Arginina</li>
+                    <li>1 banana + 15g de aveia + café sem açúcar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Pós-Treino (Treino Pesado de Perna)</span>
+                <span class="meal-time">08:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Shake anabólico: 1 scoop de Whey + 200ml de leite + 1 banana + 30g de aveia</li>
+                    <li>OU 2 fatias de pão de fôrma com 2 ovos + requeijão light</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Almoço</span>
+                <span class="meal-time">12:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>150g de mandioca ou batata cozida (substitui o arroz)</li>
+                    <li>1 concha de feijão</li>
+                    <li>140g de carne cozida ou bife magro</li>
+                    <li>Prato grande de salada folhosa</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Lanche da Tarde</span>
+                <span class="meal-time">16:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Tapioca (40g de massa) recheada com 1 fatia de queijo + 1 ovo ou frango</li>
+                    <li>1 café sem açúcar + 1 maçã</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">5. Jantar</span>
+                <span class="meal-time">20:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Mexido caseiro controlado: 3 col. sopa de arroz, feijão, 130g de carne cozida/moída, legumes picados + 1 col. sopa rasa de farinha.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUARTA-FEIRA -->
+    <div id="quarta" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Pré-Treino (Musculação + Corrida 8km)</span>
+                <span class="meal-time">05:40</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + Creatina + Arginina</li>
+                    <li>1 banana grande + 1 col. sopa reforçada de mel</li>
+                    <li>Café sem açúcar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Pós-Treino Reestruturador</span>
+                <span class="meal-time">08:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>2 fatias de pão de fôrma + 2 ovos + requeijão light</li>
+                    <li>1 fatia grande de mamão ou 200g de melão/melancia</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Almoço</span>
+                <span class="meal-time">12:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>5 col. sopa de arroz + 1 concha de feijão</li>
+                    <li>150g de peito de frango em tiras ou carne magra</li>
+                    <li>Salada colorida à vontade</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Lanche da Tarde</span>
+                <span class="meal-time">16:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>1 scoop de Whey com aveia e leite/água OU pão com pastinha de frango</li>
+                    <li>1 laranja ou maçã</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">5. Jantar</span>
+                <span class="meal-time">20:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Macarrão Alho e Óleo (1 pegador/120g cozido) + 2 col. sopa de arroz + 130g de frango/carne</li>
+                    <li>Salada com bastante brócolis ou vegetais verdes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUINTA-FEIRA -->
+    <div id="quinta" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Pré-Treino (Funcional)</span>
+                <span class="meal-time">05:40</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + Creatina + Arginina</li>
+                    <li>1 banana + café sem açúcar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Pós-Treino</span>
+                <span class="meal-time">08:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>1 pão francês sem miolo com pão e ovo + requeijão light</li>
+                    <li>Café com pingo de leite</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Almoço</span>
+                <span class="meal-time">12:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>4 col. sopa de arroz + 1 concha de feijão</li>
+                    <li>140g de bife de porco grelhado ou frango</li>
+                    <li>Abóbora cozida + salada verde à vontade</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Lanche da Tarde</span>
+                <span class="meal-time">16:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Tapioca com queijo ou pão de fôrma com frango</li>
+                    <li>Café sem açúcar + 1 fatia de melão</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">5. Jantar</span>
+                <span class="meal-time">20:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Pão com carne moída magra (Buraco quente saudável): 1 pão francês + 120g de carne moída com molho natural e salada.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEXTA-FEIRA -->
+    <div id="sexta" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Pré-Treino (Abdominal + Corrida 8km)</span>
+                <span class="meal-time">05:40</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + Creatina + Arginina</li>
+                    <li>1 banana + 1 col. sopa de mel + café</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Pós-Treino</span>
+                <span class="meal-time">08:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Shake de Whey com aveia e fruta OU 2 fatias de pão de fôrma + 2 ovos</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Almoço</span>
+                <span class="meal-time">12:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>4 col. sopa de arroz + feijão</li>
+                    <li>140g de proteína magra</li>
+                    <li>Salada completa</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Lanche da Tarde</span>
+                <span class="meal-time">16:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Pão com ovo/frango ou Tapioca</li>
+                    <li>1 café sem açúcar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">5. Jantar / Opção Social de Sexta</span>
+                <span class="meal-time">20:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li><strong>Opção Caseira:</strong> Cachorro quente caseiro (1 pão de hot dog, 1 a 2 salsichas cozidas, molho de tomate, vinagrete, pouca batata palha).</li>
+                    <li><strong>Opção Saída/Japonês:</strong> Combo de Sushi (12 a 16 peças focadas em sashimis/niguiris).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- SÁBADO -->
+    <div id="sabado" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Manhã (Pré-Vôlei - 2h de jogo)</span>
+                <span class="meal-time">08:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + Creatina + Arginina</li>
+                    <li>2 fatias de pão com ovo e requeijão light ou Shake reforçado</li>
+                    <li>1 banana extra antes de entrar em quadra</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Almoço Pós-Vôlei (Churrasco / Família)</span>
+                <span class="meal-time">13:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li><strong>No Churrasco:</strong> 1 pão de alho, 2 a 3 fatias de carnes magras/asinha/linguiça, 2 col. de farofa, vinagrete à vontade.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Lanche da Tarde</span>
+                <span class="meal-time">17:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>1 porção de fruta fresca ou 1 café sem açúcar com biscoito caseiro em porção moderada.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Jantar / Refeição Livre Controle</span>
+                <span class="meal-time">20:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li><strong>Opção Pizza:</strong> 2 a 3 fatias de pizza.</li>
+                    <li><strong>Opção Hambúrguer:</strong> 1 Hambúrguer artesanal + refrigerante zero.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- DOMINGO -->
+    <div id="domingo" class="day-section">
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">1. Pré-Longão de Corrida (10 a 18km)</span>
+                <span class="meal-time">06:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>900 ml de água + Creatina + Arginina</li>
+                    <li>2 fatias de pão de fôrma com geleia/mel ou 1 banana grande reforçada</li>
+                    <li>1 xícara de café sem açúcar</li>
+                </ul>
+                <div class="warning-box">
+                    <strong>Alerta App / Longão:</strong> Acima de 12km, consumir 1 sachê de gel de carboidrato ou 300ml de bebida isotônica na metade do percurso.
+                </div>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">2. Pós-Longão</span>
+                <span class="meal-time">09:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Shake de Whey com leite, banana e aveia OU Pão com ovos reforçado + copo de suco natural sem açúcar.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">3. Almoço de Domingo</span>
+                <span class="meal-time">13:00</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Arroz, feijão com bacon/calabresa em porção moderada, salada e proteína magra.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="meal-card">
+            <div class="meal-header">
+                <span class="meal-title">4. Jantar</span>
+                <span class="meal-time">19:30</span>
+            </div>
+            <div class="meal-content">
+                <ul>
+                    <li>Sopa de legumes com frango/carne moída ou Mexido leve com pouca gordura.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- GUIA FLEXÍVEL 80/20 -->
+    <div id="flexivel" class="day-section">
+        <div class="substitutions-grid">
+            <div class="sub-card">
+                <div class="sub-title">🍺 Cerveja / Álcool no Fim de Semana</div>
+                <ul style="font-size:0.85rem; padding-left:16px;">
+                    <li>Mantenha a meta de água elevada antes do evento.</li>
+                    <li>Intercale cada copo de cerveja com 1 copo de água pura.</li>
+                    <li>Se beber mais de 4 latões, reduza o carboidrato do jantar do mesmo dia.</li>
+                </ul>
+            </div>
+
+            <div class="sub-card">
+                <div class="sub-title">🔄 Substituições Rápidas de Carbs</div>
+                <ul style="font-size:0.85rem; padding-left:16px;">
+                    <li><strong>Arroz (4 col. sopa):</strong> 120g Batata cozida / 100g Mandioca / 100g Macarrão.</li>
+                    <li><strong>Peito de Frango (140g):</strong> 140g Carne moída / 150g Peixe / 130g Bife de Porco / 4 Ovos.</li>
+                    <li><strong>Pão de Fôrma (2 fatias):</strong> 1 Pão Francês sem miolo / 1 Tapioca média (40g).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        Plano otimizado para integração de notificações mobile. Reavaliação em 60 dias.
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+
 </body>
-
 </html>
