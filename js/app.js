@@ -1149,22 +1149,19 @@ async function solicitarPermissaoNotificacoes() {
             "granted"
         ) {
 
-            await exibirNotificacao(
-                "Meu Plano Alimentar",
-                "Notificações ativadas com sucesso ✅",
-                "teste-notificacao"
-            );
+            await enviarNotificacaoTeste();
+
+            await criarAssinaturaPush();
         }
 
-    } catch (erro) {
+            } catch (erro) {
 
-        console.error(
-            "Erro ao solicitar permissão:",
-            erro
-        );
-    }
-}
-
+                console.error(
+                    "Erro ao solicitar permissão:",
+                    erro
+                );
+            }
+        }
 
 function configurarBotaoNotificacoes() {
 
@@ -1184,7 +1181,6 @@ function configurarBotaoNotificacoes() {
 
     atualizarStatusNotificacoes();
 }
-
 
 // ======================================================
 // NOTIFICAÇÕES DE REFEIÇÃO E HIDRATAÇÃO
@@ -1423,6 +1419,175 @@ async function verificarNotificacoesAgendadas() {
     await verificarNotificacoesHidratacao();
 }
 
+function urlBase64ParaUint8Array(base64String) {
+    const padding =
+        "=".repeat(
+            (4 - base64String.length % 4) % 4
+        );
+
+    const base64 =
+        (base64String + padding)
+            .replace(/-/g, "+")
+            .replace(/_/g, "/");
+
+    const rawData =
+        window.atob(base64);
+
+    return Uint8Array.from(
+        [...rawData].map(
+            char => char.charCodeAt(0)
+        )
+    );
+}
+
+
+async function criarAssinaturaPush() {
+
+    if (
+        !("serviceWorker" in navigator) ||
+        !("PushManager" in window)
+    ) {
+        console.log(
+            "Web Push não suportado neste dispositivo."
+        );
+
+        return null;
+    }
+
+
+    if (
+        Notification.permission !==
+        "granted"
+    ) {
+        console.log(
+            "Permissão de notificação ainda não foi concedida."
+        );
+
+        return null;
+    }
+
+
+    try {
+
+        const registro =
+            await navigator
+                .serviceWorker
+                .ready;
+
+
+        let assinatura =
+            await registro
+                .pushManager
+                .getSubscription();
+
+
+        if (!assinatura) {
+
+            assinatura =
+                await registro
+                    .pushManager
+                    .subscribe({
+                        userVisibleOnly: true,
+
+                        applicationServerKey:
+                            urlBase64ParaUint8Array(
+                                "BD9JIHKQ2sBaUxBByxAtv8PgWzjbYnhDKmfTxijWrKtt7HbxjBJXGd1Oa6mk9p_gsgMRVoJGrRPhN7l7sleRC5Y"
+                            )
+                    });
+        }
+
+
+        console.log(
+            "Assinatura Push criada:"
+        );
+
+        console.log(
+            JSON.stringify(
+                assinatura,
+                null,
+                2
+            )
+        );
+
+
+        await salvarAssinaturaNoBackend(
+            assinatura
+        );
+
+
+        return assinatura;
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao criar assinatura Push:",
+            erro
+        );
+
+        return null;
+    }
+}
+
+async function salvarAssinaturaNoBackend(
+    assinatura
+) {
+
+    const URL_BACKEND =
+        "https://plano-alimentar-push.matos-felipe-a78.workers.dev/subscribe";
+
+
+    try {
+
+        const resposta =
+            await fetch(
+                URL_BACKEND,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(
+                            assinatura
+                        )
+                }
+            );
+
+
+        const dados =
+            await resposta.json();
+
+
+        if (!resposta.ok) {
+
+            console.error(
+                "Erro retornado pelo backend:",
+                dados
+            );
+
+            return;
+        }
+
+
+        console.log(
+            "Assinatura salva no backend:",
+            dados
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao enviar assinatura ao backend:",
+            erro
+        );
+    }
+}
+
 // ======================================================
 // PROGRESSO DO CICLO DE 8 SEMANAS
 // ======================================================
@@ -1643,6 +1808,8 @@ document.addEventListener(
         verificarNotificacoesAgendadas();
 
         atualizarProgressoCiclo();
+
+        criarAssinaturaPush();
     }
 );
 
