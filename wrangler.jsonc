@@ -1,30 +1,33 @@
 {
-	"name": "plano-alimentar-push",
-	"main": "worker.js",
-	"compatibility_date": "2026-10-05",
-    "keep_vars": true,
-    
-    "triggers": {
-        "crons": [
-            "* * * * *"
-        ]
-    },
+  "name": "plano-alimentar-push",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-05",
+  "keep_vars": true,
 
-	"kv_namespaces": [
-		{
-			"binding": "PUSH_SUBSCRIPTIONS",
-			"id": "70e3ec29775b43158bd22213ac7c79fe"
-		}
-	],
-	"preview_urls": false,
-	"vars": {
-		"VAPID_PUBLIC_KEY": "BD9JIHKQ2sBaUxBByxAtv8PgWzjbYnhDKmfTxijWrKtt7HbxjBJXGd1Oa6mk9p_gsgMRVoJGrRPhN7l7sleRC5Y",
-		"VAPID_SUBJECT": "mailto:matos.felipe@hotmail.com.br"
-	},
-	"observability": {
-		"enabled": true,
-		"logs": {
-			"enabled": true
-		}
-	}
+  "triggers": {
+    "crons": [
+      "* * * * *"
+    ]
+  },
+
+  "kv_namespaces": [
+    {
+      "binding": "PUSH_SUBSCRIPTIONS",
+      "id": "70e3ec29775b43158bd22213ac7c79fe"
+    }
+  ],
+
+  "preview_urls": false,
+
+  "vars": {
+    "VAPID_PUBLIC_KEY": "BD9JIHKQ2sBaUxBByxAtv8PgWzjbYnhDKmfTxijWrKtt7HbxjBJXGd1Oa6mk9p_gsgMRVoJGrRPhN7l7sleRC5Y",
+    "VAPID_SUBJECT": "mailto:matos.felipe@hotmail.com.br"
+  },
+
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true
+    }
+  }
 }

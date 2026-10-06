@@ -1,57 +1,38 @@
 console.log("Aplicativo carregado com sucesso.");
 
-
 // ======================================================
-// SERVICE WORKER
+// AMBIENTE / SERVICE WORKER
 // ======================================================
 
-const ambienteLocal =
+const AMBIENTE_LOCAL =
     location.hostname === "127.0.0.1" ||
     location.hostname === "localhost";
 
 if ("serviceWorker" in navigator) {
-
-    if (ambienteLocal) {
-
-        // No localhost, evita cache durante o desenvolvimento.
+    if (AMBIENTE_LOCAL) {
         navigator.serviceWorker
             .getRegistrations()
             .then(registrations => {
-                registrations.forEach(registration => {
-                    registration.unregister();
-                });
-
-                console.log(
-                    "Service Worker desativado no ambiente local."
-                );
+                registrations.forEach(registration => registration.unregister());
+                console.log("Service Worker desativado no ambiente local.");
             });
 
         if ("caches" in window) {
             caches.keys().then(cacheNames => {
-                cacheNames.forEach(cacheName => {
-                    caches.delete(cacheName);
-                });
+                cacheNames.forEach(cacheName => caches.delete(cacheName));
             });
         }
-
     } else {
-
         navigator.serviceWorker
             .register("./service-worker.js")
             .then(() => {
-                console.log(
-                    "Service Worker registrado com sucesso."
-                );
+                console.log("Service Worker registrado com sucesso.");
             })
             .catch(error => {
-                console.error(
-                    "Erro ao registrar Service Worker:",
-                    error
-                );
+                console.error("Erro ao registrar Service Worker:", error);
             });
     }
 }
-
 
 // ======================================================
 // CONFIGURAÇÕES GERAIS
@@ -77,90 +58,47 @@ const NOMES_DIAS = [
     "Sábado"
 ];
 
-const DURACAO_REFEICAO_MIN = 30;
-const DURACAO_HIDRATACAO_MIN = 15;
-const ANTECEDENCIA_MIN = 5;
-const AVISO_FIM_MIN = 5;
+const VAPID_PUBLIC_KEY =
+    "BD9JIHKQ2sBaUxBByxAtv8PgWzjbYnhDKmfTxijWrKtt7HbxjBJXGd1Oa6mk9p_gsgMRVoJGrRPhN7l7sleRC5Y";
+
+const URL_BACKEND =
+    "https://plano-alimentar-push.matos-felipe-a78.workers.dev/subscribe";
 
 let ultimoDiaDetectado = null;
-
-
-// ======================================================
-// DADOS DE HIDRATAÇÃO
-// ======================================================
-
-const LEMBRETES_HIDRATACAO = [
-    {
-        horario: "05:30",
-        descricao: "900 ml de água ao acordar (Creatina + Arginina)"
-    },
-    {
-        horario: "07:45",
-        descricao: "300 ml de água durante o treino"
-    },
-    {
-        horario: "10:00",
-        descricao: "500 ml de água (Garrafa 1 - Metade da Manhã)"
-    },
-    {
-        horario: "11:30",
-        descricao: "500 ml de água (Garrafa 1 - Final da Manhã)"
-    },
-    {
-        horario: "14:30",
-        descricao: "500 ml de água (Garrafa 2 - Início da Tarde)"
-    },
-    {
-        horario: "16:00",
-        descricao: "500 ml de água (Garrafa 2 - Final da Tarde)"
-    },
-    {
-        horario: "19:30",
-        descricao: "500 ml de água (Início da Noite)"
-    }
-];
-
 
 // ======================================================
 // FUNÇÕES AUXILIARES
 // ======================================================
 
-function formatarHorario(data) {
-    return data.toLocaleTimeString(
-        "pt-BR",
-        {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false
-        }
-    );
+function criarDataComHorario(dataBase, horario) {
+    const [hora, minuto] = horario.split(":").map(Number);
+
+    if (Number.isNaN(hora) || Number.isNaN(minuto)) {
+        return null;
+    }
+
+    const data = new Date(dataBase);
+    data.setHours(hora, minuto, 0, 0);
+    return data;
 }
 
-
-function formatarPeriodo(inicio, fim) {
-    return `${formatarHorario(inicio)} - ${formatarHorario(fim)}`;
+function obterDataDoDia(offsetDias = 0) {
+    const data = new Date();
+    data.setDate(data.getDate() + offsetDias);
+    data.setHours(0, 0, 0, 0);
+    return data;
 }
-
 
 function formatarTempoRestante(dataFutura, prefixo = "Faltam") {
-
-    const agora = new Date();
-
-    const diferenca =
-        dataFutura.getTime() - agora.getTime();
+    const diferenca = dataFutura.getTime() - Date.now();
 
     if (diferenca <= 0) {
         return "Agora";
     }
 
-    const minutosTotais =
-        Math.ceil(diferenca / 60000);
-
-    const horas =
-        Math.floor(minutosTotais / 60);
-
-    const minutos =
-        minutosTotais % 60;
+    const minutosTotais = Math.ceil(diferenca / 60000);
+    const horas = Math.floor(minutosTotais / 60);
+    const minutos = minutosTotais % 60;
 
     if (horas > 0) {
         return `${prefixo} ${horas}h ${minutos}min`;
@@ -169,75 +107,175 @@ function formatarTempoRestante(dataFutura, prefixo = "Faltam") {
     return `${prefixo} ${minutos} min`;
 }
 
+function obterPeriodoDoCard(card, dataBase) {
+    const horarioElemento = card.querySelector(".meal-time");
 
-function criarDataComHorario(dataBase, horario) {
-
-    const partes =
-        horario.split(":");
-
-    if (partes.length !== 2) {
+    if (!horarioElemento) {
         return null;
     }
 
-    const hora = Number(partes[0]);
-    const minuto = Number(partes[1]);
+    const inicioTexto = horarioElemento.dataset.start;
+    const fimTexto = horarioElemento.dataset.end;
 
-    if (
-        Number.isNaN(hora) ||
-        Number.isNaN(minuto)
-    ) {
+    if (!inicioTexto || !fimTexto) {
         return null;
     }
 
-    const data =
-        new Date(dataBase);
+    const inicio = criarDataComHorario(dataBase, inicioTexto);
+    const fim = criarDataComHorario(dataBase, fimTexto);
 
-    data.setHours(
-        hora,
-        minuto,
-        0,
-        0
-    );
+    if (!inicio || !fim) {
+        return null;
+    }
 
-    return data;
+    return {
+        inicio,
+        fim,
+        inicioTexto,
+        fimTexto,
+        periodoTexto: `${inicioTexto} - ${fimTexto}`
+    };
 }
 
+// ======================================================
+// TROCA DOS DIAS
+// ======================================================
 
-function adicionarMinutos(data, minutos) {
+function switchTab(dayId, button = null) {
+    document
+        .querySelectorAll(".day-section")
+        .forEach(section => section.classList.remove("active"));
 
-    const resultado =
-        new Date(data);
+    document
+        .querySelectorAll(".tab-btn")
+        .forEach(btn => btn.classList.remove("active"));
 
-    resultado.setMinutes(
-        resultado.getMinutes() + minutos
-    );
+    const selectedSection = document.getElementById(dayId);
 
-    return resultado;
+    if (selectedSection) {
+        selectedSection.classList.add("active");
+    }
+
+    if (button) {
+        button.classList.add("active");
+    } else {
+        const automaticButton = document.querySelector(
+            `[data-day="${dayId}"]`
+        );
+
+        if (automaticButton) {
+            automaticButton.classList.add("active");
+        }
+    }
 }
 
+window.switchTab = switchTab;
 
-function obterDataDoDia(offsetDias = 0) {
-
-    const data =
-        new Date();
-
-    data.setDate(
-        data.getDate() + offsetDias
-    );
-
-    data.setHours(
-        0,
-        0,
-        0,
-        0
-    );
-
-    return data;
+function abrirDiaAtual() {
+    const numeroDia = new Date().getDay();
+    switchTab(DIAS[numeroDia]);
+    ultimoDiaDetectado = numeroDia;
 }
 
+// ======================================================
+// MACROS DO DIA ATUAL
+// ======================================================
 
-function nomeRelativoDia(data, offset) {
+function atualizarMacrosDoDia() {
+    const hoje = new Date().getDay();
 
+    const metas = {
+        0: { calorias: "2.400 kcal", proteina: "150g", carbo: "280g", gordura: "60g" },
+        1: { calorias: "2.000 kcal", proteina: "150g", carbo: "210g", gordura: "55g" },
+        2: { calorias: "2.000 kcal", proteina: "150g", carbo: "210g", gordura: "55g" },
+        3: { calorias: "2.150 kcal", proteina: "150g", carbo: "240g", gordura: "55g" },
+        4: { calorias: "2.000 kcal", proteina: "150g", carbo: "210g", gordura: "55g" },
+        5: { calorias: "2.150 kcal", proteina: "150g", carbo: "240g", gordura: "55g" },
+        6: { calorias: "2.300 kcal", proteina: "140g", carbo: "240g", gordura: "70g" }
+    };
+
+    const metaHoje = metas[hoje];
+
+    document.getElementById("macro-calorias").textContent = metaHoje.calorias;
+    document.getElementById("macro-proteina").textContent = metaHoje.proteina;
+    document.getElementById("macro-carbo").textContent = metaHoje.carbo;
+    document.getElementById("macro-gordura").textContent = metaHoje.gordura;
+}
+
+// ======================================================
+// EVENTOS DOS CARDS
+// ======================================================
+
+function obterEventosDoDia(numeroDia, dataBase, tipo) {
+    const diaId = DIAS[numeroDia];
+    const secaoDoDia = document.getElementById(diaId);
+
+    if (!secaoDoDia) {
+        return [];
+    }
+
+    const seletor =
+        tipo === "meal"
+            ? '.meal-card[data-type="meal"]'
+            : '.meal-card[data-type="water"]';
+
+    const cards = secaoDoDia.querySelectorAll(seletor);
+    const eventos = [];
+
+    cards.forEach(card => {
+        const tituloElemento = card.querySelector(".meal-title");
+        const periodo = obterPeriodoDoCard(card, dataBase);
+
+        if (!tituloElemento || !periodo) {
+            return;
+        }
+
+        const titulo = tituloElemento.textContent
+            .replace(/^🍽️\s*/, "")
+            .replace(/^💧\s*/, "")
+            .trim();
+
+        eventos.push({
+            titulo,
+            card,
+            ...periodo
+        });
+    });
+
+    return eventos;
+}
+
+function encontrarEventoAtualOuProximo(tipo) {
+    const agora = new Date();
+
+    for (let offset = 0; offset <= 7; offset++) {
+        const dataBase = obterDataDoDia(offset);
+        const numeroDia = dataBase.getDay();
+        const eventos = obterEventosDoDia(numeroDia, dataBase, tipo);
+
+        for (const evento of eventos) {
+            if (offset === 0 && agora >= evento.inicio && agora < evento.fim) {
+                return {
+                    evento,
+                    offset,
+                    emAndamento: true
+                };
+            }
+
+            if (evento.inicio > agora) {
+                return {
+                    evento,
+                    offset,
+                    emAndamento: false
+                };
+            }
+        }
+    }
+
+    return null;
+}
+
+function prefixoDia(offset, dataEvento) {
     if (offset === 0) {
         return "";
     }
@@ -246,1346 +284,99 @@ function nomeRelativoDia(data, offset) {
         return "Amanhã • ";
     }
 
-    return `${NOMES_DIAS[data.getDay()]} • `;
+    return `${NOMES_DIAS[dataEvento.getDay()]} • `;
 }
 
-
-function obterConteudoRefeicao(card) {
-
-    if (!card) {
-        return "";
-    }
-
-    const itens =
-        Array.from(
-            card.querySelectorAll(".meal-content li")
-        )
-            .map(item => item.textContent.trim())
-            .filter(Boolean);
-
-    return itens.join(" • ");
-}
-
-
-function criarChaveNotificacao(
-    tipo,
-    momento,
-    dataReferencia,
-    identificador
-) {
-
-    const ano =
-        dataReferencia.getFullYear();
-
-    const mes =
-        String(
-            dataReferencia.getMonth() + 1
-        ).padStart(2, "0");
-
-    const dia =
-        String(
-            dataReferencia.getDate()
-        ).padStart(2, "0");
-
-    return [
-        "notif",
-        ano,
-        mes,
-        dia,
-        tipo,
-        momento,
-        identificador
-    ].join(":");
-}
-
-
-function estaNoMinutoAlvo(alvo) {
-
-    const agora =
-        new Date();
-
-    const diferenca =
-        agora.getTime() - alvo.getTime();
-
-    return (
-        diferenca >= 0 &&
-        diferenca < 60000
-    );
-}
-
-
 // ======================================================
-// TROCA DOS DIAS
+// PRÓXIMA / ATUAL REFEIÇÃO
 // ======================================================
-
-function switchTab(dayId, button = null) {
-
-    const sections =
-        document.querySelectorAll(
-            ".day-section"
-        );
-
-    sections.forEach(section => {
-        section.classList.remove(
-            "active"
-        );
-    });
-
-
-    const buttons =
-        document.querySelectorAll(
-            ".tab-btn"
-        );
-
-    buttons.forEach(btn => {
-        btn.classList.remove(
-            "active"
-        );
-    });
-
-
-    const selectedSection =
-        document.getElementById(
-            dayId
-        );
-
-    if (selectedSection) {
-        selectedSection.classList.add(
-            "active"
-        );
-    }
-
-
-    if (button) {
-
-        button.classList.add(
-            "active"
-        );
-
-    } else {
-
-        const automaticButton =
-            document.querySelector(
-                `[data-day="${dayId}"]`
-            );
-
-        if (automaticButton) {
-            automaticButton.classList.add(
-                "active"
-            );
-        }
-    }
-}
-
-
-// ======================================================
-// IDENTIFICAR DIA ATUAL
-// ======================================================
-
-function abrirDiaAtual() {
-
-    const hoje =
-        new Date();
-
-    const numeroDia =
-        hoje.getDay();
-
-    const diaAtual =
-        DIAS[numeroDia];
-
-    console.log(
-        "Dia identificado:",
-        diaAtual
-    );
-
-    switchTab(
-        diaAtual
-    );
-
-    ultimoDiaDetectado =
-        numeroDia;
-}
-
-
-// ======================================================
-// MACROS DO DIA ATUAL
-// ======================================================
-
-function atualizarMacrosDoDia() {
-
-    const hoje =
-        new Date().getDay();
-
-    const metas = {
-        0: {
-            calorias: "2.400 kcal",
-            proteina: "150g",
-            carbo: "280g",
-            gordura: "60g"
-        },
-        1: {
-            calorias: "2.000 kcal",
-            proteina: "150g",
-            carbo: "210g",
-            gordura: "55g"
-        },
-        2: {
-            calorias: "2.000 kcal",
-            proteina: "150g",
-            carbo: "210g",
-            gordura: "55g"
-        },
-        3: {
-            calorias: "2.150 kcal",
-            proteina: "150g",
-            carbo: "240g",
-            gordura: "55g"
-        },
-        4: {
-            calorias: "2.000 kcal",
-            proteina: "150g",
-            carbo: "210g",
-            gordura: "55g"
-        },
-        5: {
-            calorias: "2.150 kcal",
-            proteina: "150g",
-            carbo: "240g",
-            gordura: "55g"
-        },
-        6: {
-            calorias: "2.300 kcal",
-            proteina: "140g",
-            carbo: "240g",
-            gordura: "70g"
-        }
-    };
-
-    const metaHoje =
-        metas[hoje];
-
-    document.getElementById(
-        "macro-calorias"
-    ).textContent =
-        metaHoje.calorias;
-
-    document.getElementById(
-        "macro-proteina"
-    ).textContent =
-        metaHoje.proteina;
-
-    document.getElementById(
-        "macro-carbo"
-    ).textContent =
-        metaHoje.carbo;
-
-    document.getElementById(
-        "macro-gordura"
-    ).textContent =
-        metaHoje.gordura;
-}
-
-
-// ======================================================
-// REFEIÇÕES E PERÍODOS
-// ======================================================
-
-function obterRefeicoesDoDia(
-    numeroDia,
-    dataBase
-) {
-
-    const diaId =
-        DIAS[numeroDia];
-
-    const secaoDoDia =
-        document.getElementById(
-            diaId
-        );
-
-    if (!secaoDoDia) {
-        return [];
-    }
-
-    const cards =
-        secaoDoDia.querySelectorAll(
-            ".meal-card"
-        );
-
-    const refeicoes = [];
-
-    cards.forEach(card => {
-
-        const titulo =
-            card.querySelector(
-                ".meal-title"
-            );
-
-        const horario =
-            card.querySelector(
-                ".meal-time"
-            );
-
-        if (
-            !titulo ||
-            !horario
-        ) {
-            return;
-        }
-
-        const horarioInicio =
-            horario.dataset.start ||
-            (
-                horario.textContent
-                    .match(/\d{2}:\d{2}/) || []
-            )[0];
-
-        if (!horarioInicio) {
-            return;
-        }
-
-        const inicio =
-            criarDataComHorario(
-                dataBase,
-                horarioInicio
-            );
-
-        if (!inicio) {
-            return;
-        }
-
-        const fim =
-            adicionarMinutos(
-                inicio,
-                DURACAO_REFEICAO_MIN
-            );
-
-        refeicoes.push({
-            titulo:
-                titulo.textContent
-                    .replace(
-                        /^\d+\.\s*/,
-                        ""
-                    )
-                    .trim(),
-
-            inicio,
-            fim,
-            horarioInicio,
-            horarioFim:
-                formatarHorario(fim),
-
-            periodo:
-                formatarPeriodo(
-                    inicio,
-                    fim
-                ),
-
-            conteudo:
-                obterConteudoRefeicao(
-                    card
-                ),
-
-            card
-        });
-    });
-
-    return refeicoes;
-}
-
 
 function atualizarProximaRefeicao() {
-
-    const agora =
-        new Date();
-
     document
-        .querySelectorAll(
-            ".meal-card"
-        )
-        .forEach(card => {
-            card.classList.remove(
-                "next-meal-highlight",
-                "current-meal-highlight"
-            );
-        });
+        .querySelectorAll('.meal-card[data-type="meal"]')
+        .forEach(card => card.classList.remove("next-meal-highlight"));
 
-    let refeicaoAtual = null;
-    let proximaRefeicao = null;
-    let diasAFrente = 0;
+    const resultado = encontrarEventoAtualOuProximo("meal");
 
-    for (
-        let offset = 0;
-        offset <= 7;
-        offset++
-    ) {
+    const label = document.getElementById("next-meal-label");
+    const nome = document.getElementById("next-meal-name");
+    const horario = document.getElementById("next-meal-time");
+    const countdown = document.getElementById("next-meal-countdown");
 
-        const dataBase =
-            obterDataDoDia(
-                offset
-            );
-
-        const numeroDia =
-            dataBase.getDay();
-
-        const refeicoes =
-            obterRefeicoesDoDia(
-                numeroDia,
-                dataBase
-            );
-
-        if (offset === 0) {
-
-            refeicaoAtual =
-                refeicoes.find(
-                    refeicao =>
-                        agora >= refeicao.inicio &&
-                        agora < refeicao.fim
-                ) || null;
-
-            if (refeicaoAtual) {
-                break;
-            }
-        }
-
-        proximaRefeicao =
-            refeicoes.find(
-                refeicao =>
-                    refeicao.inicio > agora
-            ) || null;
-
-        if (proximaRefeicao) {
-            diasAFrente =
-                offset;
-
-            break;
-        }
-    }
-
-    const labelElemento =
-        document.getElementById(
-            "next-meal-label"
-        );
-
-    const nomeElemento =
-        document.getElementById(
-            "next-meal-name"
-        );
-
-    const horarioElemento =
-        document.getElementById(
-            "next-meal-time"
-        );
-
-    const countdownElemento =
-        document.getElementById(
-            "next-meal-countdown"
-        );
-
-    if (
-        !labelElemento ||
-        !nomeElemento ||
-        !horarioElemento ||
-        !countdownElemento
-    ) {
+    if (!label || !nome || !horario || !countdown) {
         return;
     }
 
-    if (refeicaoAtual) {
-
-        labelElemento.textContent =
-            "Período de alimentação atual";
-
-        nomeElemento.textContent =
-            refeicaoAtual.titulo;
-
-        horarioElemento.textContent =
-            refeicaoAtual.periodo;
-
-        countdownElemento.textContent =
-            formatarTempoRestante(
-                refeicaoAtual.fim,
-                "Termina em"
-            );
-
-        refeicaoAtual.card
-            .classList
-            .add(
-                "current-meal-highlight"
-            );
-
+    if (!resultado) {
+        label.textContent = "Refeição";
+        nome.textContent = "Nenhuma refeição encontrada";
+        horario.textContent = "";
+        countdown.textContent = "";
         return;
     }
 
-    if (!proximaRefeicao) {
+    const { evento, offset, emAndamento } = resultado;
+    const prefixo = prefixoDia(offset, evento.inicio);
 
-        labelElemento.textContent =
-            "Próxima refeição";
-
-        nomeElemento.textContent =
-            "Nenhuma refeição encontrada";
-
-        horarioElemento.textContent =
-            "";
-
-        countdownElemento.textContent =
-            "";
-
-        return;
+    if (emAndamento) {
+        label.textContent = "Período de alimentação atual";
+        nome.textContent = evento.titulo;
+        horario.textContent = evento.periodoTexto;
+        countdown.textContent = formatarTempoRestante(evento.fim, "Termina em");
+    } else {
+        label.textContent = "Próxima refeição";
+        nome.textContent = prefixo + evento.titulo;
+        horario.textContent = evento.periodoTexto;
+        countdown.textContent = formatarTempoRestante(evento.inicio);
     }
 
-    const prefixo =
-        nomeRelativoDia(
-            proximaRefeicao.inicio,
-            diasAFrente
-        );
-
-    labelElemento.textContent =
-        "Próxima refeição";
-
-    nomeElemento.textContent =
-        prefixo +
-        proximaRefeicao.titulo;
-
-    horarioElemento.textContent =
-        proximaRefeicao.periodo;
-
-    countdownElemento.textContent =
-        formatarTempoRestante(
-            proximaRefeicao.inicio
-        );
-
-    proximaRefeicao.card
-        .classList
-        .add(
-            "next-meal-highlight"
-        );
+    evento.card.classList.add("next-meal-highlight");
 }
 
-
 // ======================================================
-// HIDRATAÇÃO E PERÍODOS
+// PRÓXIMA / ATUAL HIDRATAÇÃO
 // ======================================================
-
-function obterLembretesHidratacao(
-    dataBase
-) {
-
-    return LEMBRETES_HIDRATACAO
-        .map(lembrete => {
-
-            const inicio =
-                criarDataComHorario(
-                    dataBase,
-                    lembrete.horario
-                );
-
-            if (!inicio) {
-                return null;
-            }
-
-            const fim =
-                adicionarMinutos(
-                    inicio,
-                    DURACAO_HIDRATACAO_MIN
-                );
-
-            return {
-                ...lembrete,
-                inicio,
-                fim,
-                periodo:
-                    formatarPeriodo(
-                        inicio,
-                        fim
-                    )
-            };
-        })
-        .filter(Boolean);
-}
-
 
 function atualizarProximaHidratacao() {
+    document
+        .querySelectorAll('.meal-card[data-type="water"]')
+        .forEach(card => card.classList.remove("next-water-highlight"));
 
-    const agora =
-        new Date();
+    const resultado = encontrarEventoAtualOuProximo("water");
 
-    let hidratacaoAtual = null;
-    let proximaHidratacao = null;
-    let diasAFrente = 0;
+    const label = document.getElementById("next-water-label");
+    const nome = document.getElementById("next-water-name");
+    const horario = document.getElementById("next-water-time");
+    const countdown = document.getElementById("next-water-countdown");
 
-    for (
-        let offset = 0;
-        offset <= 7;
-        offset++
-    ) {
-
-        const dataBase =
-            obterDataDoDia(
-                offset
-            );
-
-        const lembretes =
-            obterLembretesHidratacao(
-                dataBase
-            );
-
-        if (offset === 0) {
-
-            hidratacaoAtual =
-                lembretes.find(
-                    item =>
-                        agora >= item.inicio &&
-                        agora < item.fim
-                ) || null;
-
-            if (hidratacaoAtual) {
-                break;
-            }
-        }
-
-        proximaHidratacao =
-            lembretes.find(
-                item =>
-                    item.inicio > agora
-            ) || null;
-
-        if (proximaHidratacao) {
-            diasAFrente =
-                offset;
-
-            break;
-        }
-    }
-
-    const labelElemento =
-        document.getElementById(
-            "next-water-label"
-        );
-
-    const nomeElemento =
-        document.getElementById(
-            "next-water-name"
-        );
-
-    const horarioElemento =
-        document.getElementById(
-            "next-water-time"
-        );
-
-    const countdownElemento =
-        document.getElementById(
-            "next-water-countdown"
-        );
-
-    if (
-        !labelElemento ||
-        !nomeElemento ||
-        !horarioElemento ||
-        !countdownElemento
-    ) {
+    if (!label || !nome || !horario || !countdown) {
         return;
     }
 
-    if (hidratacaoAtual) {
-
-        labelElemento.textContent =
-            "Período de hidratação atual";
-
-        nomeElemento.textContent =
-            hidratacaoAtual.descricao;
-
-        horarioElemento.textContent =
-            hidratacaoAtual.periodo;
-
-        countdownElemento.textContent =
-            formatarTempoRestante(
-                hidratacaoAtual.fim,
-                "Termina em"
-            );
-
+    if (!resultado) {
+        label.textContent = "Hidratação";
+        nome.textContent = "Nenhum lembrete encontrado";
+        horario.textContent = "";
+        countdown.textContent = "";
         return;
     }
 
-    if (!proximaHidratacao) {
+    const { evento, offset, emAndamento } = resultado;
+    const prefixo = prefixoDia(offset, evento.inicio);
 
-        labelElemento.textContent =
-            "Próxima hidratação";
-
-        nomeElemento.textContent =
-            "Nenhum lembrete encontrado";
-
-        horarioElemento.textContent =
-            "";
-
-        countdownElemento.textContent =
-            "";
-
-        return;
+    if (emAndamento) {
+        label.textContent = "Período de hidratação atual";
+        nome.textContent = evento.titulo;
+        horario.textContent = evento.periodoTexto;
+        countdown.textContent = formatarTempoRestante(evento.fim, "Termina em");
+    } else {
+        label.textContent = "Próxima hidratação";
+        nome.textContent = prefixo + evento.titulo;
+        horario.textContent = evento.periodoTexto;
+        countdown.textContent = formatarTempoRestante(evento.inicio);
     }
 
-    const prefixo =
-        nomeRelativoDia(
-            proximaHidratacao.inicio,
-            diasAFrente
-        );
-
-    labelElemento.textContent =
-        "Próxima hidratação";
-
-    nomeElemento.textContent =
-        prefixo +
-        proximaHidratacao.descricao;
-
-    horarioElemento.textContent =
-        proximaHidratacao.periodo;
-
-    countdownElemento.textContent =
-        formatarTempoRestante(
-            proximaHidratacao.inicio
-        );
-}
-
-
-// ======================================================
-// VIRADA DO DIA
-// ======================================================
-
-function verificarMudancaDeDia() {
-
-    const diaAtual =
-        new Date().getDay();
-
-    if (
-        ultimoDiaDetectado === null
-    ) {
-        ultimoDiaDetectado =
-            diaAtual;
-
-        return;
-    }
-
-    if (
-        diaAtual !==
-        ultimoDiaDetectado
-    ) {
-
-        console.log(
-            "Novo dia detectado."
-        );
-
-        ultimoDiaDetectado =
-            diaAtual;
-
-        abrirDiaAtual();
-        atualizarMacrosDoDia();
-        atualizarProximaRefeicao();
-        atualizarProximaHidratacao();
-    }
-}
-
-
-// ======================================================
-// PERMISSÃO E EXIBIÇÃO DE NOTIFICAÇÕES
-// ======================================================
-
-function atualizarStatusNotificacoes() {
-
-    const statusElemento =
-        document.getElementById(
-            "notification-status"
-        );
-
-    const botao =
-        document.getElementById(
-            "enable-notifications"
-        );
-
-    if (
-        !statusElemento ||
-        !botao
-    ) {
-        return;
-    }
-
-    if (
-        !("Notification" in window)
-    ) {
-
-        statusElemento.textContent =
-            "Este dispositivo não suporta notificações.";
-
-        botao.disabled = true;
-
-        return;
-    }
-
-    if (
-        Notification.permission ===
-        "granted"
-    ) {
-
-        statusElemento.textContent =
-            "Notificações ativadas";
-
-        botao.textContent =
-            "Ativadas";
-
-        botao.disabled = true;
-
-        return;
-    }
-
-    if (
-        Notification.permission ===
-        "denied"
-    ) {
-
-        statusElemento.textContent =
-            "Permissão bloqueada nas configurações";
-
-        botao.textContent =
-            "Bloqueadas";
-
-        botao.disabled = true;
-
-        return;
-    }
-
-    statusElemento.textContent =
-        "Não ativadas";
-
-    botao.textContent =
-        "Ativar notificações";
-
-    botao.disabled = false;
-}
-
-
-async function exibirNotificacao(
-    titulo,
-    corpo,
-    tag
-) {
-
-    if (
-        !("Notification" in window) ||
-        Notification.permission !==
-        "granted"
-    ) {
-        return;
-    }
-
-    try {
-
-        if (
-            ambienteLocal ||
-            !("serviceWorker" in navigator)
-        ) {
-
-            new Notification(
-                titulo,
-                {
-                    body: corpo,
-                    icon:
-                        "./icons/icon-192.png",
-                    tag
-                }
-            );
-
-            return;
-        }
-
-        const registro =
-            await navigator
-                .serviceWorker
-                .ready;
-
-        await registro.showNotification(
-            titulo,
-            {
-                body: corpo,
-                icon:
-                    "./icons/icon-192.png",
-                badge:
-                    "./icons/icon-192.png",
-                tag
-            }
-        );
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao exibir notificação:",
-            erro
-        );
-    }
-}
-
-
-async function solicitarPermissaoNotificacoes() {
-
-    if (
-        !("Notification" in window)
-    ) {
-
-        alert(
-            "Este dispositivo não suporta notificações."
-        );
-
-        return;
-    }
-
-    try {
-
-        const permissao =
-            await Notification
-                .requestPermission();
-
-        atualizarStatusNotificacoes();
-
-        if (
-            permissao ===
-            "granted"
-        ) {
-
-            await enviarNotificacaoTeste();
-
-            await criarAssinaturaPush();
-        }
-
-            } catch (erro) {
-
-                console.error(
-                    "Erro ao solicitar permissão:",
-                    erro
-                );
-            }
-        }
-
-function configurarBotaoNotificacoes() {
-
-    const botao =
-        document.getElementById(
-            "enable-notifications"
-        );
-
-    if (!botao) {
-        return;
-    }
-
-    botao.addEventListener(
-        "click",
-        solicitarPermissaoNotificacoes
-    );
-
-    atualizarStatusNotificacoes();
-}
-
-// ======================================================
-// NOTIFICAÇÕES DE REFEIÇÃO E HIDRATAÇÃO
-// enquanto o app estiver ativo.
-// O Web Push em segundo plano entra na próxima etapa.
-// ======================================================
-
-async function enviarNotificacaoUmaVez(
-    chave,
-    titulo,
-    corpo
-) {
-
-    if (
-        localStorage.getItem(chave)
-    ) {
-        return;
-    }
-
-    await exibirNotificacao(
-        titulo,
-        corpo,
-        chave
-    );
-
-    localStorage.setItem(
-        chave,
-        "1"
-    );
-}
-
-
-async function verificarNotificacoesRefeicoes() {
-
-    if (
-        !("Notification" in window) ||
-        Notification.permission !==
-        "granted"
-    ) {
-        return;
-    }
-
-    const hoje =
-        obterDataDoDia(0);
-
-    const numeroDia =
-        hoje.getDay();
-
-    const refeicoes =
-        obterRefeicoesDoDia(
-            numeroDia,
-            hoje
-        );
-
-    for (
-        const refeicao
-        of refeicoes
-    ) {
-
-        const cincoAntesInicio =
-            adicionarMinutos(
-                refeicao.inicio,
-                -ANTECEDENCIA_MIN
-            );
-
-        const cincoAntesFim =
-            adicionarMinutos(
-                refeicao.fim,
-                -AVISO_FIM_MIN
-            );
-
-        const idBase =
-            `${numeroDia}-${refeicao.horarioInicio}-${refeicao.titulo}`;
-
-        if (
-            estaNoMinutoAlvo(
-                cincoAntesInicio
-            )
-        ) {
-
-            await enviarNotificacaoUmaVez(
-                criarChaveNotificacao(
-                    "refeicao",
-                    "pre-inicio",
-                    refeicao.inicio,
-                    idBase
-                ),
-                "🍽️ Sua próxima refeição está chegando",
-                `${refeicao.titulo} começa em 5 minutos, às ${refeicao.horarioInicio}.`
-            );
-        }
-
-        if (
-            estaNoMinutoAlvo(
-                refeicao.inicio
-            )
-        ) {
-
-            const conteudo =
-                refeicao.conteudo
-                    ? ` O que ingerir: ${refeicao.conteudo}`
-                    : "";
-
-            await enviarNotificacaoUmaVez(
-                criarChaveNotificacao(
-                    "refeicao",
-                    "inicio",
-                    refeicao.inicio,
-                    idBase
-                ),
-                "🍽️ Seu período de alimentação começou",
-                `${refeicao.titulo} • ${refeicao.periodo}.${conteudo}`
-            );
-        }
-
-        if (
-            estaNoMinutoAlvo(
-                cincoAntesFim
-            )
-        ) {
-
-            await enviarNotificacaoUmaVez(
-                criarChaveNotificacao(
-                    "refeicao",
-                    "pre-fim",
-                    refeicao.inicio,
-                    idBase
-                ),
-                "⏳ Seu período de alimentação está terminando",
-                `${refeicao.titulo}: faltam 5 minutos para o período acabar.`
-            );
-        }
-    }
-}
-
-
-async function verificarNotificacoesHidratacao() {
-
-    if (
-        !("Notification" in window) ||
-        Notification.permission !==
-        "granted"
-    ) {
-        return;
-    }
-
-    const hoje =
-        obterDataDoDia(0);
-
-    const lembretes =
-        obterLembretesHidratacao(
-            hoje
-        );
-
-    for (
-        const item
-        of lembretes
-    ) {
-
-        const cincoAntesInicio =
-            adicionarMinutos(
-                item.inicio,
-                -ANTECEDENCIA_MIN
-            );
-
-        const cincoAntesFim =
-            adicionarMinutos(
-                item.fim,
-                -AVISO_FIM_MIN
-            );
-
-        const idBase =
-            `${item.horario}-${item.descricao}`;
-
-        if (
-            estaNoMinutoAlvo(
-                cincoAntesInicio
-            )
-        ) {
-
-            await enviarNotificacaoUmaVez(
-                criarChaveNotificacao(
-                    "hidratacao",
-                    "pre-inicio",
-                    item.inicio,
-                    idBase
-                ),
-                "💧 Sua próxima hidratação está chegando",
-                `Seu próximo período de hidratação começa em 5 minutos, às ${item.horario}.`
-            );
-        }
-
-        if (
-            estaNoMinutoAlvo(
-                item.inicio
-            )
-        ) {
-
-            await enviarNotificacaoUmaVez(
-                criarChaveNotificacao(
-                    "hidratacao",
-                    "inicio",
-                    item.inicio,
-                    idBase
-                ),
-                "💧 Seu período de hidratação começou",
-                `${item.periodo}. O que ingerir: ${item.descricao}.`
-            );
-        }
-
-        if (
-            estaNoMinutoAlvo(
-                cincoAntesFim
-            )
-        ) {
-
-            await enviarNotificacaoUmaVez(
-                criarChaveNotificacao(
-                    "hidratacao",
-                    "pre-fim",
-                    item.inicio,
-                    idBase
-                ),
-                "⏳ Seu período de hidratação está terminando",
-                "Faltam 5 minutos para o período de hidratação acabar."
-            );
-        }
-    }
-}
-
-
-async function verificarNotificacoesAgendadas() {
-
-    await verificarNotificacoesRefeicoes();
-
-    await verificarNotificacoesHidratacao();
-}
-
-function urlBase64ParaUint8Array(base64String) {
-    const padding =
-        "=".repeat(
-            (4 - base64String.length % 4) % 4
-        );
-
-    const base64 =
-        (base64String + padding)
-            .replace(/-/g, "+")
-            .replace(/_/g, "/");
-
-    const rawData =
-        window.atob(base64);
-
-    return Uint8Array.from(
-        [...rawData].map(
-            char => char.charCodeAt(0)
-        )
-    );
-}
-
-
-async function criarAssinaturaPush() {
-
-    if (
-        !("serviceWorker" in navigator) ||
-        !("PushManager" in window)
-    ) {
-        console.log(
-            "Web Push não suportado neste dispositivo."
-        );
-
-        return null;
-    }
-
-
-    if (
-        Notification.permission !==
-        "granted"
-    ) {
-        console.log(
-            "Permissão de notificação ainda não foi concedida."
-        );
-
-        return null;
-    }
-
-
-    try {
-
-        const registro =
-            await navigator
-                .serviceWorker
-                .ready;
-
-
-        let assinatura =
-            await registro
-                .pushManager
-                .getSubscription();
-
-
-        if (!assinatura) {
-
-            assinatura =
-                await registro
-                    .pushManager
-                    .subscribe({
-                        userVisibleOnly: true,
-
-                        applicationServerKey:
-                            urlBase64ParaUint8Array(
-                                "BD9JIHKQ2sBaUxBByxAtv8PgWzjbYnhDKmfTxijWrKtt7HbxjBJXGd1Oa6mk9p_gsgMRVoJGrRPhN7l7sleRC5Y"
-                            )
-                    });
-        }
-
-
-        console.log(
-            "Assinatura Push criada:"
-        );
-
-        console.log(
-            JSON.stringify(
-                assinatura,
-                null,
-                2
-            )
-        );
-
-
-        await salvarAssinaturaNoBackend(
-            assinatura
-        );
-
-
-        return assinatura;
-
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao criar assinatura Push:",
-            erro
-        );
-
-        return null;
-    }
-}
-
-async function salvarAssinaturaNoBackend(
-    assinatura
-) {
-
-    const URL_BACKEND =
-        "https://plano-alimentar-push.matos-felipe-a78.workers.dev/subscribe";
-
-
-    try {
-
-        const resposta =
-            await fetch(
-                URL_BACKEND,
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body:
-                        JSON.stringify(
-                            assinatura
-                        )
-                }
-            );
-
-
-        const dados =
-            await resposta.json();
-
-
-        if (!resposta.ok) {
-
-            console.error(
-                "Erro retornado pelo backend:",
-                dados
-            );
-
-            return;
-        }
-
-
-        console.log(
-            "Assinatura salva no backend:",
-            dados
-        );
-
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao enviar assinatura ao backend:",
-            erro
-        );
-    }
+    evento.card.classList.add("next-water-highlight");
 }
 
 // ======================================================
@@ -1593,242 +384,273 @@ async function salvarAssinaturaNoBackend(
 // ======================================================
 
 function atualizarProgressoCiclo() {
+    const dataInicio = new Date(2026, 9, 5);
+    const totalSemanas = 8;
+    const totalDias = totalSemanas * 7;
 
-    const DATA_INICIO =
-        new Date(2026, 9, 5);
+    dataInicio.setHours(0, 0, 0, 0);
 
-    const TOTAL_SEMANAS =
-        8;
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
 
-    const DIAS_POR_SEMANA =
-        7;
+    const fimCiclo = new Date(dataInicio);
+    fimCiclo.setDate(dataInicio.getDate() + totalDias - 1);
 
-    const TOTAL_DIAS =
-        TOTAL_SEMANAS * DIAS_POR_SEMANA;
+    const diferencaDias = Math.floor((hoje - dataInicio) / 86400000);
+    let semanaAtual = Math.floor(diferencaDias / 7) + 1;
+    let concluido = hoje > fimCiclo;
 
+    if (semanaAtual < 1) semanaAtual = 1;
+    if (semanaAtual > totalSemanas) semanaAtual = totalSemanas;
 
-    const hoje =
-        new Date();
+    const percentual = concluido
+        ? 100
+        : (semanaAtual / totalSemanas) * 100;
 
-    hoje.setHours(
-        0,
-        0,
-        0,
-        0
-    );
+    const inicioSemana = new Date(dataInicio);
+    inicioSemana.setDate(dataInicio.getDate() + (semanaAtual - 1) * 7);
 
+    const fimSemana = new Date(inicioSemana);
+    fimSemana.setDate(inicioSemana.getDate() + 6);
 
-    DATA_INICIO.setHours(
-        0,
-        0,
-        0,
-        0
-    );
+    const formatar = data => data.toLocaleDateString("pt-BR");
 
+    const semanaElemento = document.getElementById("cycle-week");
+    const percentualElemento = document.getElementById("cycle-percentage");
+    const barraElemento = document.getElementById("cycle-progress-fill");
+    const periodoElemento = document.getElementById("cycle-period");
 
-    const diferencaMs =
-        hoje - DATA_INICIO;
-
-    const diferencaDias =
-        Math.floor(
-            diferencaMs /
-            (1000 * 60 * 60 * 24)
-        );
-
-
-    let semanaAtual =
-        Math.floor(
-            diferencaDias /
-            DIAS_POR_SEMANA
-        ) + 1;
-
-
-    if (semanaAtual < 1) {
-        semanaAtual = 1;
+    if (!semanaElemento || !percentualElemento || !barraElemento || !periodoElemento) {
+        return;
     }
 
+    if (concluido) {
+        semanaElemento.textContent = "Ciclo concluído • 8/8";
+        percentualElemento.textContent = "100%";
+        periodoElemento.textContent = `Ciclo: ${formatar(dataInicio)} a ${formatar(fimCiclo)}`;
+    } else if (hoje < dataInicio) {
+        semanaElemento.textContent = "Ciclo ainda não iniciado";
+        percentualElemento.textContent = "0%";
+        periodoElemento.textContent = `Início: ${formatar(dataInicio)}`;
+        barraElemento.style.width = "0%";
+        return;
+    } else {
+        semanaElemento.textContent = `Semana ${semanaAtual}/8`;
+        percentualElemento.textContent = `${percentual.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
+        periodoElemento.textContent = `${formatar(inicioSemana)} a ${formatar(fimSemana)}`;
+    }
 
+    barraElemento.style.width = `${percentual}%`;
+}
+
+// ======================================================
+// VIRADA DO DIA
+// ======================================================
+
+function verificarMudancaDeDia() {
+    const diaAtual = new Date().getDay();
+
+    if (ultimoDiaDetectado === null) {
+        ultimoDiaDetectado = diaAtual;
+        return;
+    }
+
+    if (diaAtual !== ultimoDiaDetectado) {
+        ultimoDiaDetectado = diaAtual;
+        abrirDiaAtual();
+        atualizarMacrosDoDia();
+        atualizarProgressoCiclo();
+    }
+}
+
+// ======================================================
+// NOTIFICAÇÕES / WEB PUSH
+// ======================================================
+
+function atualizarStatusNotificacoes() {
+    const statusElemento = document.getElementById("notification-status");
+    const botao = document.getElementById("enable-notifications");
+
+    if (!statusElemento || !botao) {
+        return;
+    }
+
+    if (!("Notification" in window)) {
+        statusElemento.textContent = "Este dispositivo não suporta notificações.";
+        botao.disabled = true;
+        return;
+    }
+
+    if (Notification.permission === "granted") {
+        statusElemento.textContent = "Notificações ativadas";
+        botao.textContent = "Ativadas";
+        botao.disabled = true;
+        return;
+    }
+
+    if (Notification.permission === "denied") {
+        statusElemento.textContent = "Permissão bloqueada nas configurações";
+        botao.textContent = "Bloqueadas";
+        botao.disabled = true;
+        return;
+    }
+
+    statusElemento.textContent = "Não ativadas";
+    botao.textContent = "Ativar notificações";
+    botao.disabled = false;
+}
+
+async function solicitarPermissaoNotificacoes() {
+    if (!("Notification" in window)) {
+        alert("Este dispositivo não suporta notificações.");
+        return;
+    }
+
+    try {
+        const permissao = await Notification.requestPermission();
+        atualizarStatusNotificacoes();
+
+        if (permissao === "granted") {
+            if (!AMBIENTE_LOCAL) {
+                await enviarNotificacaoTeste();
+                await criarAssinaturaPush();
+            }
+        }
+    } catch (erro) {
+        console.error("Erro ao solicitar permissão:", erro);
+    }
+}
+
+async function enviarNotificacaoTeste() {
     if (
-        semanaAtual >
-        TOTAL_SEMANAS
-    ) {
-        semanaAtual =
-            TOTAL_SEMANAS;
-    }
-
-
-    let progressoPercentual =
-        (
-            semanaAtual /
-            TOTAL_SEMANAS
-        ) * 100;
-
-
-    const fimCiclo =
-        new Date(
-            DATA_INICIO
-        );
-
-    fimCiclo.setDate(
-        DATA_INICIO.getDate() +
-        TOTAL_DIAS - 1
-    );
-
-
-    const cicloConcluido =
-        hoje > fimCiclo;
-
-
-    if (cicloConcluido) {
-
-        semanaAtual =
-            TOTAL_SEMANAS;
-
-        progressoPercentual =
-            100;
-    }
-
-
-    const inicioSemana =
-        new Date(
-            DATA_INICIO
-        );
-
-    inicioSemana.setDate(
-        DATA_INICIO.getDate() +
-        (
-            semanaAtual - 1
-        ) * DIAS_POR_SEMANA
-    );
-
-
-    const fimSemana =
-        new Date(
-            inicioSemana
-        );
-
-    fimSemana.setDate(
-        inicioSemana.getDate() +
-        6
-    );
-
-
-    const formatarData =
-        data => {
-
-            return data
-                .toLocaleDateString(
-                    "pt-BR"
-                );
-        };
-
-
-    const semanaElemento =
-        document.getElementById(
-            "cycle-week"
-        );
-
-    const percentualElemento =
-        document.getElementById(
-            "cycle-percentage"
-        );
-
-    const barraElemento =
-        document.getElementById(
-            "cycle-progress-fill"
-        );
-
-    const periodoElemento =
-        document.getElementById(
-            "cycle-period"
-        );
-
-
-    if (
-        !semanaElemento ||
-        !percentualElemento ||
-        !barraElemento ||
-        !periodoElemento
+        AMBIENTE_LOCAL ||
+        Notification.permission !== "granted" ||
+        !("serviceWorker" in navigator)
     ) {
         return;
     }
 
+    try {
+        const registro = await navigator.serviceWorker.ready;
 
-    if (cicloConcluido) {
+        await registro.showNotification(
+            "Meu Plano Alimentar",
+            {
+                body: "Notificações ativadas com sucesso ✅",
+                icon: "./icons/icon-192.png",
+                badge: "./icons/icon-192.png",
+                tag: "teste-notificacao"
+            }
+        );
+    } catch (erro) {
+        console.error("Erro ao enviar notificação de teste:", erro);
+    }
+}
 
-        semanaElemento.textContent =
-            "Ciclo concluído • 8/8";
+function urlBase64ParaUint8Array(base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+        .replace(/-/g, "+")
+        .replace(/_/g, "/");
 
-        percentualElemento.textContent =
-            "100%";
+    const rawData = window.atob(base64);
 
-        periodoElemento.textContent =
-            `Ciclo: ${formatarData(DATA_INICIO)} a ${formatarData(fimCiclo)}`;
+    return Uint8Array.from(
+        [...rawData].map(char => char.charCodeAt(0))
+    );
+}
 
-    } else {
-
-        semanaElemento.textContent =
-            `Semana ${semanaAtual}/8`;
-
-        percentualElemento.textContent =
-            `${progressoPercentual.toLocaleString(
-                "pt-BR",
-                {
-                    maximumFractionDigits: 1
-                }
-            )}%`;
-
-        periodoElemento.textContent =
-            `${formatarData(inicioSemana)} a ${formatarData(fimSemana)}`;
+async function criarAssinaturaPush() {
+    if (AMBIENTE_LOCAL) {
+        return null;
     }
 
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        console.log("Web Push não suportado neste dispositivo.");
+        return null;
+    }
 
-    barraElemento.style.width =
-        `${progressoPercentual}%`;
+    if (Notification.permission !== "granted") {
+        return null;
+    }
+
+    try {
+        const registro = await navigator.serviceWorker.ready;
+
+        let assinatura = await registro.pushManager.getSubscription();
+
+        if (!assinatura) {
+            assinatura = await registro.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ParaUint8Array(VAPID_PUBLIC_KEY)
+            });
+        }
+
+        await salvarAssinaturaNoBackend(assinatura);
+        return assinatura;
+    } catch (erro) {
+        console.error("Erro ao criar assinatura Push:", erro);
+        return null;
+    }
+}
+
+async function salvarAssinaturaNoBackend(assinatura) {
+    try {
+        const resposta = await fetch(URL_BACKEND, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(assinatura)
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            console.error("Erro retornado pelo backend:", dados);
+            return;
+        }
+
+        console.log("Assinatura salva no backend:", dados);
+    } catch (erro) {
+        console.error("Erro ao enviar assinatura ao backend:", erro);
+    }
+}
+
+function configurarBotaoNotificacoes() {
+    const botao = document.getElementById("enable-notifications");
+
+    if (!botao) {
+        return;
+    }
+
+    botao.addEventListener("click", solicitarPermissaoNotificacoes);
+    atualizarStatusNotificacoes();
 }
 
 // ======================================================
-// INICIALIZAÇÃO DO APP
+// INICIALIZAÇÃO
 // ======================================================
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+document.addEventListener("DOMContentLoaded", () => {
+    abrirDiaAtual();
+    atualizarMacrosDoDia();
+    atualizarProgressoCiclo();
+    atualizarProximaRefeicao();
+    atualizarProximaHidratacao();
+    configurarBotaoNotificacoes();
 
-        abrirDiaAtual();
-
-        atualizarMacrosDoDia();
-
-        atualizarProximaRefeicao();
-
-        atualizarProximaHidratacao();
-
-        configurarBotaoNotificacoes();
-
-        verificarNotificacoesAgendadas();
-
-        atualizarProgressoCiclo();
-
+    if (
+        !AMBIENTE_LOCAL &&
+        "Notification" in window &&
+        Notification.permission === "granted"
+    ) {
         criarAssinaturaPush();
     }
-);
+});
 
-
-// ======================================================
-// ATUALIZAÇÃO AUTOMÁTICA
-// ======================================================
-
-setInterval(
-    () => {
-
-        verificarMudancaDeDia();
-
-        atualizarProximaRefeicao();
-
-        atualizarProximaHidratacao();
-
-        verificarNotificacoesAgendadas();
-
-    },
-    30000
-);
+setInterval(() => {
+    verificarMudancaDeDia();
+    atualizarProximaRefeicao();
+    atualizarProximaHidratacao();
+}, 60000);
