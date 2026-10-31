@@ -1,4 +1,4 @@
-const CACHE_NAME = "plano-alimentar-v6";
+const CACHE_NAME = "plano-hibrido-v8";
 
 const arquivosParaCache = [
     "./",

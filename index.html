@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plano de Alta Performance & Definição - 8 Semanas</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e293b">
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atleta Híbrido - Alimentação + Treino 16 Semanas</title>
+<link href="manifest.json" rel="manifest"/>
+<meta content="#1e293b" name="theme-color"/>
+<style>
 
         :root {
             --primary: #1e293b;
@@ -520,901 +521,930 @@
             }
         }
 
-    </style>
+    
+
+        /* ===== NAVEGAÇÃO DO APP HÍBRIDO ===== */
+        body { padding-bottom: 84px; }
+        .app-screen { display: none; }
+        .app-screen.active { display: block; }
+        .screen-topbar { display:flex; align-items:center; gap:10px; margin:4px 0 12px; }
+        .back-button { border:0; background:#e2e8f0; color:#0f172a; width:38px; height:38px; border-radius:12px; font-size:1.15rem; cursor:pointer; }
+        .screen-title h2 { margin:0; font-size:1.18rem; color:#0f172a; }
+        .screen-title p { margin:1px 0 0; font-size:.74rem; color:#64748b; }
+        .home-hero { background:linear-gradient(145deg,#ecfdf5 0%,#f0f9ff 100%); border:1px solid #d1fae5; border-radius:18px; padding:18px; margin-bottom:14px; }
+        .home-kicker { font-size:.72rem; font-weight:700; color:#059669; text-transform:uppercase; letter-spacing:.05em; }
+        .home-hero h1 { margin:5px 0 2px; font-size:1.7rem; color:#0f172a; }
+        .home-hero h1 span { color:#059669; }
+        .home-hero p { margin:0; color:#64748b; font-size:.86rem; }
+        .home-progress { margin-top:14px; background:#fff; border:1px solid #dbeafe; border-radius:14px; padding:12px; }
+        .home-progress-top { display:flex; justify-content:space-between; gap:10px; font-size:.78rem; font-weight:800; color:#0f172a; }
+        .home-progress-bar { height:7px; margin-top:8px; border-radius:999px; background:#e2e8f0; overflow:hidden; }
+        .home-progress-fill { height:100%; width:0; background:linear-gradient(90deg,#10b981,#0ea5e9); border-radius:999px; transition:width .35s ease; }
+        .home-progress-period { margin-top:6px; color:#64748b; font-size:.68rem; }
+        .dashboard-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+        .dashboard-card { min-height:116px; border:1px solid var(--border); border-radius:16px; padding:14px; text-align:left; cursor:pointer; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.05); }
+        .dashboard-card .icon { display:grid; place-items:center; width:38px; height:38px; border-radius:12px; margin-bottom:9px; font-size:1.15rem; }
+        .dashboard-card strong { display:block; color:#0f172a; font-size:.93rem; }
+        .dashboard-card small { display:block; color:#64748b; font-size:.68rem; margin-top:2px; line-height:1.25; }
+        .dashboard-card.food { background:#ecfdf5; border-color:#bbf7d0; } .dashboard-card.food .icon{background:#d1fae5;}
+        .dashboard-card.training { background:#f0fdf4; border-color:#bbf7d0; } .dashboard-card.training .icon{background:#dcfce7;}
+        .dashboard-card.run { background:#eff6ff; border-color:#bfdbfe; } .dashboard-card.run .icon{background:#dbeafe;}
+        .dashboard-card.guide { background:#fffbeb; border-color:#fde68a; } .dashboard-card.guide .icon{background:#fef3c7;}
+        .dashboard-card.water { background:#f0f9ff; border-color:#bae6fd; } .dashboard-card.water .icon{background:#e0f2fe;}
+        .dashboard-card.progress { background:#faf5ff; border-color:#e9d5ff; } .dashboard-card.progress .icon{background:#f3e8ff;}
+        .home-next { margin-top:12px; border:1px solid var(--border); background:#fff; border-radius:14px; padding:12px 14px; display:flex; justify-content:space-between; gap:12px; align-items:center; }
+        .home-next small { display:block; color:#64748b; font-size:.68rem; } .home-next strong{font-size:.88rem;color:#0f172a;}
+        .bottom-nav { position:fixed; left:50%; bottom:0; transform:translateX(-50%); width:min(800px,100%); z-index:50; background:rgba(255,255,255,.96); backdrop-filter:blur(10px); border-top:1px solid #e2e8f0; display:grid; grid-template-columns:repeat(3,1fr); padding:7px max(10px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)); box-shadow:0 -6px 20px rgba(15,23,42,.06); }
+        .bottom-nav button { border:0; background:transparent; color:#64748b; font-size:.68rem; font-weight:700; padding:6px 2px; cursor:pointer; }
+        .bottom-nav button span { display:block; font-size:1.15rem; line-height:1.1; margin-bottom:2px; }
+        .bottom-nav button.active { color:#059669; }
+        .training-tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:12px; }
+        .training-tab-btn { border:1px solid var(--border); background:#fff; color:#64748b; padding:9px 6px; border-radius:12px; font-weight:700; font-size:.78rem; cursor:pointer; }
+        .training-tab-btn.active { background:#059669; border-color:#059669; color:white; }
+        .training-panel { display:none; } .training-panel.active{display:block;}
+        .training-card { background:#fff; border:1px solid var(--border); border-radius:14px; padding:13px; margin-bottom:9px; display:grid; grid-template-columns:52px 1fr; gap:10px; align-items:start; }
+        .training-day { border-radius:10px; padding:8px 4px; text-align:center; font-size:.72rem; font-weight:800; color:#065f46; background:#ecfdf5; }
+        .training-day.run { color:#075985; background:#e0f2fe; }
+        .training-day.rest { color:#475569; background:#f1f5f9; }
+        .training-card h3 { margin:0; font-size:.9rem; color:#0f172a; }
+        .training-card p { margin:3px 0 0; color:#64748b; font-size:.74rem; }
+        .training-card .detail { margin-top:5px; font-size:.7rem; color:#475569; }
+        .training-summary { background:linear-gradient(135deg,#ecfdf5,#eff6ff); border:1px solid #bbf7d0; border-radius:15px; padding:14px; margin-bottom:12px; }
+        .training-summary-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.training-summary strong{color:#065f46}.training-summary span{font-size:.72rem;color:#64748b}
+        .run-progression { margin-top:10px; display:grid; grid-template-columns:repeat(4,1fr); gap:5px; }
+        .run-progression div { background:#fff; border:1px solid #dbeafe; border-radius:9px; padding:7px 4px; text-align:center; font-size:.65rem; }
+        .run-progression b { display:block; color:#0369a1; font-size:.76rem; }
+        .exercise-card { background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:10px; }
+        .exercise-card h3 { margin:0 0 8px; color:#0f172a; font-size:1rem; }
+        .exercise-row { display:grid; grid-template-columns:1fr auto; gap:10px; padding:8px 0; border-top:1px solid #f1f5f9; font-size:.78rem; }
+        .exercise-row:first-of-type{border-top:0}.exercise-row b{color:#0f172a}.exercise-row span{color:#64748b;text-align:right}
+        .pre-run-box,.load-monitor { border-radius:14px; padding:13px; margin:10px 0; font-size:.77rem; }
+        .pre-run-box { background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a; }
+        .load-monitor { background:#fffbeb; border:1px solid #fde68a; color:#78350f; }
+        .pre-run-box h3,.load-monitor h3{margin:0 0 6px;font-size:.9rem}.pre-run-box ol,.load-monitor ul{margin:0;padding-left:18px}
+        .phase-card { background:#fff; border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:8px; }
+        .phase-card strong{color:#0f172a}.phase-card p{margin:3px 0 0;font-size:.73rem;color:#64748b}
+        @media(max-width:420px){.dashboard-card{min-height:108px;padding:12px}.home-hero h1{font-size:1.45rem}.training-card{grid-template-columns:46px 1fr}}
+</style>
 </head>
 <body>
-<div class="container">
-
-    <header>
-        <h1>Plano de Alta Performance & Definição</h1>
-        <p>Atleta: Felipe Matos de Souza</p>
-
-        <div class="cycle-progress">
-            <div class="cycle-progress-header">
-                <span id="cycle-week">Semana 1/8</span>
-                <span id="cycle-percentage">12,5%</span>
-            </div>
-            <div class="cycle-progress-bar">
-                <div id="cycle-progress-fill" class="cycle-progress-fill"></div>
-            </div>
-            <div id="cycle-period" class="cycle-period">05/10/2026 a 11/10/2026</div>
-        </div>
-
-        <div class="metrics-grid">
-            <div class="metric-card"><div class="val">32 anos</div><div class="lbl">Idade</div></div>
-            <div class="metric-card"><div class="val">1,75 m</div><div class="lbl">Altura</div></div>
-            <div class="metric-card"><div class="val">72 kg</div><div class="lbl">Peso Atual</div></div>
-            <div class="metric-card"><div class="val">14,8%</div><div class="lbl">BF% Atual</div></div>
-            <div class="metric-card"><div class="val">10-12%</div><div class="lbl">Meta de BF%</div></div>
-            <div class="metric-card"><div class="val">2.550 kcal</div><div class="lbl">Gasto Diário (TDEE)</div></div>
-        </div>
-
-        <div id="daily-macros" class="daily-macros">
-            <div id="next-meal-card" class="next-meal-card">
-                <div id="next-meal-label" class="next-meal-label">Próxima refeição</div>
-                <div class="next-meal-main">
-                    <div>
-                        <div id="next-meal-name" class="next-meal-name">--</div>
-                        <div id="next-meal-time" class="next-meal-time">--:--</div>
-                    </div>
-                    <div id="next-meal-countdown" class="next-meal-countdown">--</div>
-                </div>
-            </div>
-
-            <div id="next-water-card" class="next-water-card">
-                <div id="next-water-label" class="next-water-label">Próxima hidratação</div>
-                <div class="next-water-main">
-                    <div>
-                        <div id="next-water-name" class="next-water-name">--</div>
-                        <div id="next-water-time" class="next-water-time">--:--</div>
-                    </div>
-                    <div id="next-water-countdown" class="next-water-countdown">--</div>
-                </div>
-            </div>
-
-            <div class="daily-macros-title">Meta de hoje</div>
-            <div class="daily-macros-grid">
-                <div><span id="macro-calorias">--</span><small>Calorias</small></div>
-                <div><span id="macro-proteina">--</span><small>Proteína</small></div>
-                <div><span id="macro-carbo">--</span><small>Carboidratos</small></div>
-                <div><span id="macro-gordura">--</span><small>Gorduras</small></div>
-            </div>
-        </div>
-
-        <div class="notification-settings">
-            <div>
-                <div class="notification-title">🔔 Notificações</div>
-                <div id="notification-status" class="notification-status">Não ativadas</div>
-            </div>
-            <button id="enable-notifications" class="notification-button" type="button">Ativar notificações</button>
-        </div>
-    </header>
-
-
-    <div class="nav-tabs">
-        <button class="tab-btn" data-day="segunda" onclick="switchTab('segunda', this)">Segunda</button>
-        <button class="tab-btn" data-day="terca" onclick="switchTab('terca', this)">Terça</button>
-        <button class="tab-btn" data-day="quarta" onclick="switchTab('quarta', this)">Quarta</button>
-        <button class="tab-btn" data-day="quinta" onclick="switchTab('quinta', this)">Quinta</button>
-        <button class="tab-btn" data-day="sexta" onclick="switchTab('sexta', this)">Sexta</button>
-        <button class="tab-btn" data-day="sabado" onclick="switchTab('sabado', this)">Sábado</button>
-        <button class="tab-btn" data-day="domingo" onclick="switchTab('domingo', this)">Domingo</button>
-        <button class="tab-btn" data-day="flexivel" onclick="switchTab('flexivel', this)">Guia Flexível / 80-20</button>
-    </div>
-
-    <div id="segunda" class="day-section">
-        
-        
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="05:45" data-end="06:00">05:45 - 06:00</span>
-            </div>
-            <div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Pré-Treino Imediato</span>
-                <span class="meal-time" data-start="05:50" data-end="06:20">05:50 - 06:20</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>900 ml de água + 5g Creatina + 3g Arginina</li><li>1 banana média + 1 col. sopa de mel (ou aveia)</li><li>1 xícara de café sem açúcar</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="07:45" data-end="08:00">07:45 - 08:00</span>
-            </div>
-            <div class="meal-content">300 ml de água.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Pós-Treino / Café da Manhã</span>
-                <span class="meal-time" data-start="08:30" data-end="09:00">08:30 - 09:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>2 fatias de pão de fôrma (ou 1 pão francês sem miolo)</li><li>2 ovos inteiros mexidos ou cozidos</li><li>1 col. sopa rasa de requeijão cremoso light</li><li>1 xícara de café sem açúcar (ou com pingo de leite)</li></ul>
-                <div class="tip-box"><strong>Opção rápida:</strong> 1 scoop de Whey + 200ml de leite + 1 banana + 30g de aveia.</div>
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="10:00" data-end="10:15">10:00 - 10:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="11:30" data-end="11:45">11:30 - 11:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Almoço</span>
-                <span class="meal-time" data-start="12:30" data-end="13:00">12:30 - 13:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>4 col. sopa de arroz branco/integral (100g)</li><li>1 concha média de feijão (100g)</li><li>140–150g de peito de frango, bife bovino magro grelhado ou carne bovina em tiras</li><li>Salada à vontade + 1 col. chá de azeite</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="14:30" data-end="14:45">14:30 - 14:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="16:00" data-end="16:15">16:00 - 16:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Lanche da Tarde</span>
-                <span class="meal-time" data-start="16:30" data-end="17:00">16:30 - 17:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>1 pão de fôrma com pastinha de frango desfiado com maionese light (ou tapioca com queijo)</li><li>1 porção de fruta (maçã, laranja ou 200g de melancia)</li><li>1 xícara de café sem açúcar ou chá</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="19:30" data-end="19:45">19:30 - 19:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — início da noite.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Jantar</span>
-                <span class="meal-time" data-start="20:00" data-end="20:30">20:00 - 20:30</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>3 col. sopa de arroz + 1 concha pequena de feijão</li><li>130–150g de carne bovina magra, carne moída magra ou frango</li><li>Salada/Verduras à vontade</li></ul>
-                
-            </div>
-        </div>
-    </div>
-    <div id="terca" class="day-section">
-        
-        
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="05:45" data-end="06:00">05:45 - 06:00</span>
-            </div>
-            <div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Pré-Treino</span>
-                <span class="meal-time" data-start="05:50" data-end="06:20">05:50 - 06:20</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>900 ml de água + Creatina + Arginina</li><li>1 banana + 15g de aveia + café sem açúcar</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="07:45" data-end="08:00">07:45 - 08:00</span>
-            </div>
-            <div class="meal-content">300 ml de água.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Pós-Treino</span>
-                <span class="meal-time" data-start="08:30" data-end="09:00">08:30 - 09:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Shake: 1 scoop de Whey + 200ml de leite + 1 banana + 30g de aveia</li><li>OU 2 fatias de pão de fôrma com 2 ovos + requeijão light</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="10:00" data-end="10:15">10:00 - 10:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="11:30" data-end="11:45">11:30 - 11:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Almoço</span>
-                <span class="meal-time" data-start="12:30" data-end="13:00">12:30 - 13:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>150g de mandioca ou batata cozida</li><li>1 concha de feijão</li><li>140–150g de carne bovina magra, bife grelhado ou frango</li><li>Prato grande de salada folhosa</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="14:30" data-end="14:45">14:30 - 14:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="16:00" data-end="16:15">16:00 - 16:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Lanche da Tarde</span>
-                <span class="meal-time" data-start="16:30" data-end="17:00">16:30 - 17:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Tapioca (40g de massa) com queijo + 1 ovo ou frango</li><li>1 café sem açúcar + 1 maçã</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="19:30" data-end="19:45">19:30 - 19:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — início da noite.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Jantar</span>
-                <span class="meal-time" data-start="20:00" data-end="20:30">20:00 - 20:30</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Mexido caseiro controlado: 3 col. sopa de arroz, feijão, 130–150g de carne bovina magra/frango, legumes + 1 col. sopa rasa de farinha</li></ul>
-                
-            </div>
-        </div>
-    </div>
-    <div id="quarta" class="day-section">
-        
-        
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="05:45" data-end="06:00">05:45 - 06:00</span>
-            </div>
-            <div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Pré-Treino (Musculação + Corrida 8km)</span>
-                <span class="meal-time" data-start="05:50" data-end="06:20">05:50 - 06:20</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>900 ml de água + Creatina + Arginina</li><li>1 banana grande + 1 col. sopa reforçada de mel</li><li>Café sem açúcar</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="07:45" data-end="08:00">07:45 - 08:00</span>
-            </div>
-            <div class="meal-content">300 ml de água.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Pós-Treino Reestruturador</span>
-                <span class="meal-time" data-start="08:30" data-end="09:00">08:30 - 09:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>2 fatias de pão de fôrma + 2 ovos + requeijão light</li><li>1 fatia grande de mamão ou 200g de melão/melancia</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="10:00" data-end="10:15">10:00 - 10:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="11:30" data-end="11:45">11:30 - 11:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Almoço</span>
-                <span class="meal-time" data-start="12:30" data-end="13:00">12:30 - 13:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>5 col. sopa de arroz + 1 concha de feijão</li><li>150g de peito de frango, bife bovino magro ou carne em tiras</li><li>Salada colorida à vontade</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="14:30" data-end="14:45">14:30 - 14:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="16:00" data-end="16:15">16:00 - 16:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Lanche da Tarde</span>
-                <span class="meal-time" data-start="16:30" data-end="17:00">16:30 - 17:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>1 scoop de Whey com aveia e leite/água OU pão com pastinha de frango</li><li>1 laranja ou maçã</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="19:30" data-end="19:45">19:30 - 19:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — início da noite.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Jantar</span>
-                <span class="meal-time" data-start="20:00" data-end="20:30">20:00 - 20:30</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Macarrão alho e óleo (1 pegador/120g cozido) + 2 col. sopa de arroz</li><li>130–150g de frango, bife bovino magro ou carne em tiras</li><li>Salada com bastante brócolis ou vegetais verdes</li></ul>
-                
-            </div>
-        </div>
-    </div>
-    <div id="quinta" class="day-section">
-        
-        
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="05:45" data-end="06:00">05:45 - 06:00</span>
-            </div>
-            <div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Pré-Treino (Funcional)</span>
-                <span class="meal-time" data-start="05:50" data-end="06:20">05:50 - 06:20</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>900 ml de água + Creatina + Arginina</li><li>1 banana + café sem açúcar</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="07:45" data-end="08:00">07:45 - 08:00</span>
-            </div>
-            <div class="meal-content">300 ml de água.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Pós-Treino</span>
-                <span class="meal-time" data-start="08:30" data-end="09:00">08:30 - 09:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>1 pão francês sem miolo com ovo + requeijão light</li><li>Café com pingo de leite</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="10:00" data-end="10:15">10:00 - 10:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="11:30" data-end="11:45">11:30 - 11:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Almoço</span>
-                <span class="meal-time" data-start="12:30" data-end="13:00">12:30 - 13:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>4 col. sopa de arroz + 1 concha de feijão</li><li>140–150g de bife bovino magro, carne em tiras, porco magro ou frango</li><li>Abóbora cozida + salada verde à vontade</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="14:30" data-end="14:45">14:30 - 14:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="16:00" data-end="16:15">16:00 - 16:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Lanche da Tarde</span>
-                <span class="meal-time" data-start="16:30" data-end="17:00">16:30 - 17:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Tapioca com queijo ou pão de fôrma com frango</li><li>Café sem açúcar + 1 fatia de melão</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="19:30" data-end="19:45">19:30 - 19:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — início da noite.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Jantar</span>
-                <span class="meal-time" data-start="20:00" data-end="20:30">20:00 - 20:30</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>1 pão francês + 120–150g de carne moída magra com molho natural e salada</li></ul>
-                
-            </div>
-        </div>
-    </div>
-    <div id="sexta" class="day-section">
-        
-        
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="05:45" data-end="06:00">05:45 - 06:00</span>
-            </div>
-            <div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Pré-Treino (Abdominal + Corrida 8km)</span>
-                <span class="meal-time" data-start="05:50" data-end="06:20">05:50 - 06:20</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>900 ml de água + Creatina + Arginina</li><li>1 banana + 1 col. sopa de mel + café</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="07:45" data-end="08:00">07:45 - 08:00</span>
-            </div>
-            <div class="meal-content">300 ml de água.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Pós-Treino</span>
-                <span class="meal-time" data-start="08:30" data-end="09:00">08:30 - 09:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Shake de Whey com aveia e fruta OU 2 fatias de pão de fôrma + 2 ovos</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="10:00" data-end="10:15">10:00 - 10:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="11:30" data-end="11:45">11:30 - 11:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Almoço</span>
-                <span class="meal-time" data-start="12:30" data-end="13:00">12:30 - 13:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>4 col. sopa de arroz + feijão</li><li>140–150g de proteína magra: frango, bife bovino grelhado ou carne em tiras</li><li>Salada completa</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="14:30" data-end="14:45">14:30 - 14:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="16:00" data-end="16:15">16:00 - 16:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Lanche da Tarde</span>
-                <span class="meal-time" data-start="16:30" data-end="17:00">16:30 - 17:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Pão com ovo/frango ou tapioca</li><li>1 café sem açúcar</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="19:30" data-end="19:45">19:30 - 19:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — início da noite.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Jantar / Opção Social</span>
-                <span class="meal-time" data-start="20:30" data-end="21:00">20:30 - 21:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Opção 1: 2 pães franceses com 120–150g de carne moída magra; OU cachorro-quente com salsicha + queijo muçarela, molho de tomate, cebola e tomate; sem batata palha</li><li>Opção 2: Japonês — 12 a 16 peças, priorizando sashimis/niguiris</li><li>Opção 3: Macarrão com molho de tomate + 120–150g de carne bovina em tiras, carne moída ou frango</li></ul>
-                
-            </div>
-        </div>
-    </div>
-    <div id="sabado" class="day-section">
-        <div class="section-note">🏐 Vôlei: 15:00–18:00. O lanche das 17:00 continua como lembrete para levar algo ou usar como pós-vôlei.</div>
-        
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="05:45" data-end="06:00">05:45 - 06:00</span>
-            </div>
-            <div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="07:45" data-end="08:00">07:45 - 08:00</span>
-            </div>
-            <div class="meal-content">300 ml de água.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Café da Manhã</span>
-                <span class="meal-time" data-start="08:30" data-end="09:00">08:30 - 09:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>2 fatias de pão ou 1 pão francês</li><li>2 ovos + requeijão light</li><li>1 banana ou outra fruta</li><li>Café</li><li>Alternativa: shake com Whey + leite + banana + aveia</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="10:00" data-end="10:15">10:00 - 10:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="11:30" data-end="11:45">11:30 - 11:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Almoço</span>
-                <span class="meal-time" data-start="12:30" data-end="13:00">12:30 - 13:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>4–5 col. sopa de arroz</li><li>1 concha de feijão</li><li>140–150g de frango, bife bovino magro ou carne em tiras</li><li>Legumes/salada</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="14:30" data-end="14:45">14:30 - 14:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="16:00" data-end="16:15">16:00 - 16:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Lanche da Tarde</span>
-                <span class="meal-time" data-start="17:00" data-end="17:30">17:00 - 17:30</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Se estiver no vôlei: banana, barrinha, isotônico, fruta ou sanduíche simples para levar e consumir no intervalo/ao final</li><li>Pós-vôlei: pão com frango, carne ou ovo</li><li>OU shake de Whey + banana + granola + leite</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="19:30" data-end="19:45">19:30 - 19:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — início da noite.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Jantar</span>
-                <span class="meal-time" data-start="20:30" data-end="21:00">20:30 - 21:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Opção normal: arroz + feijão + 140–150g de carne/frango + legumes/salada</li><li>Opção sopa reforçada: legumes + frango desfiado ou carne moída + mandioca, batata ou macarrão</li><li>Opção prática/ceia proteica: Whey + leite + banana + aveia + iogurte</li></ul>
-                
-            </div>
-        </div>
-    </div>
-    <div id="domingo" class="day-section">
-        <div class="section-note">🏃 O longão é o padrão do domingo. Se não houver corrida após o vôlei de sábado, use um café da manhã normal no lugar do pré/pós-longão.</div>
-        
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="05:45" data-end="06:00">05:45 - 06:00</span>
-            </div>
-            <div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Pré-Longão de Corrida (10 a 18km)</span>
-                <span class="meal-time" data-start="06:00" data-end="06:30">06:00 - 06:30</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>900 ml de água + Creatina + Arginina</li><li>2 fatias de pão de fôrma com geleia/mel ou 1 banana grande reforçada</li><li>1 xícara de café sem açúcar</li></ul>
-                <div class="warning-box"><strong>Longão acima de 12km:</strong> considerar 1 sachê de gel de carboidrato ou 300ml de bebida isotônica na metade do percurso.</div>
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="07:45" data-end="08:00">07:45 - 08:00</span>
-            </div>
-            <div class="meal-content">300 ml de água.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Pós-Longão</span>
-                <span class="meal-time" data-start="09:00" data-end="09:30">09:00 - 09:30</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Shake de Whey com leite, banana e aveia OU pão com ovos reforçado + copo de suco natural sem açúcar</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="10:00" data-end="10:15">10:00 - 10:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="11:30" data-end="11:45">11:30 - 11:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Almoço de Domingo</span>
-                <span class="meal-time" data-start="13:00" data-end="13:30">13:00 - 13:30</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Opção churrasco (cerca de 2 domingos do ciclo): carnes, arroz, farofa moderada, vinagrete/salada e pão de alho se quiser</li><li>Opção lasanha de frango + salada</li><li>Opção carne de panela com batata/mandioca + arroz + salada</li><li>Opção frango assado + arroz + feijão + batata assada + salada</li><li>Opção escondidinho de carne ou frango</li></ul>
-                <div class="tip-box"><strong>Nos domingos de churrasco:</strong> intercale cerveja com água e mantenha a hidratação ao longo da tarde.</div>
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="14:30" data-end="14:45">14:30 - 14:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="16:00" data-end="16:15">16:00 - 16:15</span>
-            </div>
-            <div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Lanche da Tarde</span>
-                <span class="meal-time" data-start="16:30" data-end="17:00">16:30 - 17:00</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Iogurte + fruta + aveia</li><li>OU pão/tapioca com queijo ou frango</li><li>OU Whey + fruta</li></ul>
-                
-            </div>
-        </div>
-        <div class="meal-card water-card" data-type="water">
-            <div class="meal-header">
-                <span class="meal-title water-title">💧 Hidratação</span>
-                <span class="meal-time" data-start="19:30" data-end="19:45">19:30 - 19:45</span>
-            </div>
-            <div class="meal-content">500 ml de água — início da noite.</div>
-        </div>
-        <div class="meal-card" data-type="meal">
-            <div class="meal-header">
-                <span class="meal-title">🍽️ Jantar</span>
-                <span class="meal-time" data-start="20:00" data-end="20:30">20:00 - 20:30</span>
-            </div>
-            <div class="meal-content">
-                <ul><li>Em domingo sem churrasco: 2–3 fatias de pizza OU 1 hambúrguer artesanal + refrigerante zero</li><li>Em domingo com churrasco + cerveja: se houver fome, prefira omelete, sanduíche leve ou Whey/iogurte/fruta</li></ul>
-                
-            </div>
-        </div>
-    </div>
-
-    <div id="flexivel" class="day-section">
-        <div class="macro-table-container">
-            <strong style="color:var(--primary);font-size:.95rem;">🎯 Metas de Macronutrientes por Tipo de Dia</strong>
-            <table class="macro-table">
-                <thead>
-                    <tr>
-                        <th>Dia / Atividade</th>
-                        <th>Calorias</th>
-                        <th>Proteínas</th>
-                        <th>Carbs</th>
-                        <th>Gorduras</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Seg/Ter/Qui</strong></td>
-                        <td>~2.000 kcal</td>
-                        <td>150g</td>
-                        <td>210g</td>
-                        <td>55g</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Qua/Sex</strong></td>
-                        <td>~2.150 kcal</td>
-                        <td>150g</td>
-                        <td>240g</td>
-                        <td>55g</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Sábado</strong></td>
-                        <td>~2.300 kcal</td>
-                        <td>140g</td>
-                        <td>240g</td>
-                        <td>70g</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Domingo</strong></td>
-                        <td>~2.400 kcal</td>
-                        <td>150g</td>
-                        <td>280g</td>
-                        <td>60g</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="substitutions-grid">
-            <div class="sub-card">
-                <div class="sub-title">🥩 Equivalência de Proteínas</div>
-                <ul>
-                    <li><strong>140g de peito de frango:</strong> aproximadamente 140–150g de bife bovino magro grelhado ou carne bovina em tiras.</li>
-                    <li>Boas opções: patinho, coxão mole e alcatra com pouca gordura aparente.</li>
-                    <li><strong>Peito de frango (140g):</strong> também pode ser substituído por 150g de peixe, 130g de bife de porco ou 4 ovos.</li>
-                </ul>
-            </div>
-
-            <div class="sub-card">
-                <div class="sub-title">🔄 Substituições Rápidas de Carboidratos</div>
-                <ul>
-                    <li><strong>4 col. sopa de arroz:</strong> 120g de batata cozida / 100g de mandioca / 100g de macarrão.</li>
-                    <li><strong>2 fatias de pão de fôrma:</strong> 1 pão francês sem miolo / 1 tapioca média (40g).</li>
-                </ul>
-            </div>
-
-            <div class="sub-card">
-                <div class="sub-title">🍺 Churrasco e Cerveja no Domingo</div>
-                <ul>
-                    <li>Os domingos de churrasco são uma opção eventual, cerca de 2 vezes ao longo do ciclo.</li>
-                    <li>Intercale cerveja com água e mantenha a hidratação ao longo da tarde.</li>
-                    <li>Se o almoço já foi mais livre, prefira um jantar leve caso sinta fome.</li>
-                </ul>
-            </div>
-
-            <div class="sub-card">
-                <div class="sub-title">🏃 Domingo sem Longão</div>
-                <ul>
-                    <li>Se não houver longão após o vôlei de sábado, substitua o pré/pós-longão por um café da manhã normal/caprichado.</li>
-                    <li>Mantenha almoço, lanche e jantar normalmente.</li>
-                </ul>
-            </div>
-
-            <div class="sub-card">
-                <div class="sub-title">🍕 Refeição Livre</div>
-                <ul>
-                    <li>Pizza ou hambúrguer ficam preferencialmente no domingo à noite quando não houver churrasco.</li>
-                    <li>No sábado pós-vôlei, priorize recuperação com proteína, carboidrato e hidratação.</li>
-                </ul>
-            </div>
-
-            <div class="sub-card">
-                <div class="sub-title">💡 Regra 80/20</div>
-                <ul>
-                    <li>Use o plano como base da rotina e mantenha flexibilidade em refeições sociais sem transformar exceções em padrão.</li>
-                    <li>Ao trocar uma refeição, procure preservar principalmente a fonte de proteína e a estrutura geral do dia.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <div class="footer-note">Plano de 8 semanas com acompanhamento de refeições, hidratação e notificações.</div>
+<div class="container"><section class="app-screen active" id="screen-home">
+<div class="home-hero">
+<div class="home-kicker">Projeto Carnaval • 16 semanas</div>
+<h1>Atleta <span>Híbrido</span></h1>
+<p>Força, corrida, alimentação e recuperação no mesmo plano.</p>
+<div class="home-progress">
+<div class="home-progress-top"><span id="home-cycle-week">Semana 1/16</span><span id="home-cycle-percentage">6,3%</span></div>
+<div class="home-progress-bar"><div class="home-progress-fill" id="home-cycle-progress-fill"></div></div>
+<div class="home-progress-period" id="home-cycle-period">25/10/2026 a 31/10/2026</div>
 </div>
+</div>
+<div class="dashboard-grid">
+<button class="dashboard-card food" onclick="openScreen('food')"><span class="icon">🍽️</span><strong>Plano Alimentar</strong><small>Refeições, macros e hidratação do dia</small></button>
+<button class="dashboard-card training" onclick="openScreen('training','week')"><span class="icon">🏋️</span><strong>Treinos</strong><small>Full Body, cardio e recuperação</small></button>
+<button class="dashboard-card run" onclick="openScreen('training','running')"><span class="icon">🏃</span><strong>Corridas</strong><small>Progressão até os 21,1 km</small></button>
+<button class="dashboard-card guide" onclick="openFoodTab('flexivel')"><span class="icon">🌿</span><strong>Guia Flexível 80/20</strong><small>Metas e substituições práticas</small></button>
+<button class="dashboard-card water" onclick="openFoodToday()"><span class="icon">💧</span><strong>Hidratação</strong><small>Lembretes permanecem no plano alimentar</small></button>
+<button class="dashboard-card progress" onclick="openScreen('training','week')"><span class="icon">📈</span><strong>Progresso</strong><small>Semana atual e evolução do longão</small></button>
+</div>
+<div class="home-next"><div><small>Hoje</small><strong id="home-today-training">Carregando treino...</strong></div><span>›</span></div>
+</section><section class="app-screen" id="screen-food"><div class="screen-topbar"><button class="back-button" onclick="openScreen('home')">‹</button><div class="screen-title"><h2>Plano Alimentar</h2><p>16 semanas • notificações de alimentação e hidratação</p></div></div>
+<header>
+<h1>Plano de Alta Performance &amp; Definição</h1>
+<p>Atleta: Felipe Matos de Souza</p>
+<div class="cycle-progress">
+<div class="cycle-progress-header">
+<span id="cycle-week">Semana 1/16</span>
+<span id="cycle-percentage">6,3%</span>
+</div>
+<div class="cycle-progress-bar">
+<div class="cycle-progress-fill" id="cycle-progress-fill"></div>
+</div>
+<div class="cycle-period" id="cycle-period">25/10/2026 a 31/10/2026</div>
+</div>
+<div class="metrics-grid">
+<div class="metric-card"><div class="val">32 anos</div><div class="lbl">Idade</div></div>
+<div class="metric-card"><div class="val">1,75 m</div><div class="lbl">Altura</div></div>
+<div class="metric-card"><div class="val">72 kg</div><div class="lbl">Peso Atual</div></div>
+<div class="metric-card"><div class="val">14,8%</div><div class="lbl">BF% Atual</div></div>
+<div class="metric-card"><div class="val">10-12%</div><div class="lbl">Meta de BF%</div></div>
+<div class="metric-card"><div class="val">2.550 kcal</div><div class="lbl">Gasto Diário (TDEE)</div></div>
+</div>
+<div class="daily-macros" id="daily-macros">
+<div class="next-meal-card" id="next-meal-card">
+<div class="next-meal-label" id="next-meal-label">Próxima refeição</div>
+<div class="next-meal-main">
+<div>
+<div class="next-meal-name" id="next-meal-name">--</div>
+<div class="next-meal-time" id="next-meal-time">--:--</div>
+</div>
+<div class="next-meal-countdown" id="next-meal-countdown">--</div>
+</div>
+</div>
+<div class="next-water-card" id="next-water-card">
+<div class="next-water-label" id="next-water-label">Próxima hidratação</div>
+<div class="next-water-main">
+<div>
+<div class="next-water-name" id="next-water-name">--</div>
+<div class="next-water-time" id="next-water-time">--:--</div>
+</div>
+<div class="next-water-countdown" id="next-water-countdown">--</div>
+</div>
+</div>
+<div class="daily-macros-title">Meta de hoje</div>
+<div class="daily-macros-grid">
+<div><span id="macro-calorias">--</span><small>Calorias</small></div>
+<div><span id="macro-proteina">--</span><small>Proteína</small></div>
+<div><span id="macro-carbo">--</span><small>Carboidratos</small></div>
+<div><span id="macro-gordura">--</span><small>Gorduras</small></div>
+</div>
+</div>
+<div class="notification-settings">
+<div>
+<div class="notification-title">🔔 Notificações</div>
+<div class="notification-status" id="notification-status">Não ativadas</div>
+</div>
+<button class="notification-button" id="enable-notifications" type="button">Ativar notificações</button>
+</div>
+</header>
+<div class="nav-tabs">
+<button class="tab-btn" data-day="segunda" onclick="switchTab('segunda', this)">Segunda</button>
+<button class="tab-btn" data-day="terca" onclick="switchTab('terca', this)">Terça</button>
+<button class="tab-btn" data-day="quarta" onclick="switchTab('quarta', this)">Quarta</button>
+<button class="tab-btn" data-day="quinta" onclick="switchTab('quinta', this)">Quinta</button>
+<button class="tab-btn" data-day="sexta" onclick="switchTab('sexta', this)">Sexta</button>
+<button class="tab-btn" data-day="sabado" onclick="switchTab('sabado', this)">Sábado</button>
+<button class="tab-btn" data-day="domingo" onclick="switchTab('domingo', this)">Domingo</button>
+<button class="tab-btn" data-day="flexivel" onclick="switchTab('flexivel', this)">Guia Flexível / 80-20</button>
+</div>
+<div class="day-section" id="segunda">
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="06:00" data-start="05:45">05:45 - 06:00</span>
+</div>
+<div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Pré-Treino (Full Body A)</span>
+<span class="meal-time" data-end="06:20" data-start="05:50">05:50 - 06:20</span>
+</div>
+<div class="meal-content">
+<ul><li>900 ml de água + 5g Creatina + 3g Arginina</li><li>1 banana média + 1 col. sopa de mel (ou aveia)</li><li>1 xícara de café sem açúcar</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="08:00" data-start="07:45">07:45 - 08:00</span>
+</div>
+<div class="meal-content">300 ml de água.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Pós-Treino / Café da Manhã</span>
+<span class="meal-time" data-end="09:00" data-start="08:30">08:30 - 09:00</span>
+</div>
+<div class="meal-content">
+<ul><li>2 fatias de pão de fôrma (ou 1 pão francês sem miolo)</li><li>2 ovos inteiros mexidos ou cozidos</li><li>1 col. sopa rasa de requeijão cremoso light</li><li>1 xícara de café sem açúcar (ou com pingo de leite)</li></ul>
+<div class="tip-box"><strong>Opção rápida:</strong> 1 scoop de Whey + 200ml de leite + 1 banana + 30g de aveia.</div>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="10:15" data-start="10:00">10:00 - 10:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="11:45" data-start="11:30">11:30 - 11:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Almoço</span>
+<span class="meal-time" data-end="13:00" data-start="12:30">12:30 - 13:00</span>
+</div>
+<div class="meal-content">
+<ul><li>4 col. sopa de arroz branco/integral (100g)</li><li>1 concha média de feijão (100g)</li><li>140–150g de peito de frango, bife bovino magro grelhado ou carne bovina em tiras</li><li>Salada à vontade + 1 col. chá de azeite</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="14:45" data-start="14:30">14:30 - 14:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="16:15" data-start="16:00">16:00 - 16:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Lanche da Tarde</span>
+<span class="meal-time" data-end="17:00" data-start="16:30">16:30 - 17:00</span>
+</div>
+<div class="meal-content">
+<ul><li>1 pão de fôrma com pastinha de frango desfiado com maionese light (ou tapioca com queijo)</li><li>1 porção de fruta (maçã, laranja ou 200g de melancia)</li><li>1 xícara de café sem açúcar ou chá</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="19:45" data-start="19:30">19:30 - 19:45</span>
+</div>
+<div class="meal-content">500 ml de água — início da noite.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Jantar</span>
+<span class="meal-time" data-end="20:30" data-start="20:00">20:00 - 20:30</span>
+</div>
+<div class="meal-content">
+<ul><li>3 col. sopa de arroz + 1 concha pequena de feijão</li><li>130–150g de carne bovina magra, carne moída magra ou frango</li><li>Salada/Verduras à vontade</li></ul>
+</div>
+</div>
+</div>
+<div class="day-section" id="terca">
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="06:00" data-start="05:45">05:45 - 06:00</span>
+</div>
+<div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Pré-Corrida</span>
+<span class="meal-time" data-end="06:20" data-start="05:50">05:50 - 06:20</span>
+</div>
+<div class="meal-content">
+<ul><li>900 ml de água + Creatina + Arginina</li><li>1 banana + 15g de aveia + café sem açúcar</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="08:00" data-start="07:45">07:45 - 08:00</span>
+</div>
+<div class="meal-content">300 ml de água.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Pós-Corrida / Café da Manhã</span>
+<span class="meal-time" data-end="09:00" data-start="08:30">08:30 - 09:00</span>
+</div>
+<div class="meal-content">
+<ul><li>Shake: 1 scoop de Whey + 200ml de leite + 1 banana + 30g de aveia</li><li>OU 2 fatias de pão de fôrma com 2 ovos + requeijão light</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="10:15" data-start="10:00">10:00 - 10:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="11:45" data-start="11:30">11:30 - 11:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Almoço</span>
+<span class="meal-time" data-end="13:00" data-start="12:30">12:30 - 13:00</span>
+</div>
+<div class="meal-content">
+<ul><li>150g de mandioca ou batata cozida</li><li>1 concha de feijão</li><li>140–150g de carne bovina magra, bife grelhado ou frango</li><li>Prato grande de salada folhosa</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="14:45" data-start="14:30">14:30 - 14:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="16:15" data-start="16:00">16:00 - 16:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Lanche da Tarde</span>
+<span class="meal-time" data-end="17:00" data-start="16:30">16:30 - 17:00</span>
+</div>
+<div class="meal-content">
+<ul><li>Tapioca (40g de massa) com queijo + 1 ovo ou frango</li><li>1 café sem açúcar + 1 maçã</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="19:45" data-start="19:30">19:30 - 19:45</span>
+</div>
+<div class="meal-content">500 ml de água — início da noite.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Jantar</span>
+<span class="meal-time" data-end="20:30" data-start="20:00">20:00 - 20:30</span>
+</div>
+<div class="meal-content">
+<ul><li>Mexido caseiro controlado: 3 col. sopa de arroz, feijão, 130–150g de carne bovina magra/frango, legumes + 1 col. sopa rasa de farinha</li></ul>
+</div>
+</div>
+</div>
+<div class="day-section" id="quarta">
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="06:00" data-start="05:45">05:45 - 06:00</span>
+</div>
+<div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Pré-Treino (Full Body B)</span>
+<span class="meal-time" data-end="06:20" data-start="05:50">05:50 - 06:20</span>
+</div>
+<div class="meal-content">
+<ul><li>900 ml de água + Creatina + Arginina</li><li>1 banana grande + 1 col. sopa reforçada de mel</li><li>Café sem açúcar</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="08:00" data-start="07:45">07:45 - 08:00</span>
+</div>
+<div class="meal-content">300 ml de água.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Pós-Treino / Café da Manhã</span>
+<span class="meal-time" data-end="09:00" data-start="08:30">08:30 - 09:00</span>
+</div>
+<div class="meal-content">
+<ul><li>2 fatias de pão de fôrma + 2 ovos + requeijão light</li><li>1 fatia grande de mamão ou 200g de melão/melancia</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="10:15" data-start="10:00">10:00 - 10:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="11:45" data-start="11:30">11:30 - 11:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Almoço</span>
+<span class="meal-time" data-end="13:00" data-start="12:30">12:30 - 13:00</span>
+</div>
+<div class="meal-content">
+<ul><li>5 col. sopa de arroz + 1 concha de feijão</li><li>150g de peito de frango, bife bovino magro ou carne em tiras</li><li>Salada colorida à vontade</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="14:45" data-start="14:30">14:30 - 14:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="16:15" data-start="16:00">16:00 - 16:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Lanche da Tarde</span>
+<span class="meal-time" data-end="17:00" data-start="16:30">16:30 - 17:00</span>
+</div>
+<div class="meal-content">
+<ul><li>1 scoop de Whey com aveia e leite/água OU pão com pastinha de frango</li><li>1 laranja ou maçã</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="19:45" data-start="19:30">19:30 - 19:45</span>
+</div>
+<div class="meal-content">500 ml de água — início da noite.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Jantar</span>
+<span class="meal-time" data-end="20:30" data-start="20:00">20:00 - 20:30</span>
+</div>
+<div class="meal-content">
+<ul><li>Macarrão alho e óleo (1 pegador/120g cozido) + 2 col. sopa de arroz</li><li>130–150g de frango, bife bovino magro ou carne em tiras</li><li>Salada com bastante brócolis ou vegetais verdes</li></ul>
+</div>
+</div>
+</div>
+<div class="day-section" id="quinta">
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="06:00" data-start="05:45">05:45 - 06:00</span>
+</div>
+<div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Pré-Treino (Funcional / Tiros)</span>
+<span class="meal-time" data-end="06:20" data-start="05:50">05:50 - 06:20</span>
+</div>
+<div class="meal-content">
+<ul><li>900 ml de água + Creatina + Arginina</li><li>1 banana + café sem açúcar</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="08:00" data-start="07:45">07:45 - 08:00</span>
+</div>
+<div class="meal-content">300 ml de água.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Pós-Treino</span>
+<span class="meal-time" data-end="09:00" data-start="08:30">08:30 - 09:00</span>
+</div>
+<div class="meal-content">
+<ul><li>1 pão francês sem miolo com ovo + requeijão light</li><li>Café com pingo de leite</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="10:15" data-start="10:00">10:00 - 10:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="11:45" data-start="11:30">11:30 - 11:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Almoço</span>
+<span class="meal-time" data-end="13:00" data-start="12:30">12:30 - 13:00</span>
+</div>
+<div class="meal-content">
+<ul><li>4 col. sopa de arroz + 1 concha de feijão</li><li>140–150g de bife bovino magro, carne em tiras, porco magro ou frango</li><li>Abóbora cozida + salada verde à vontade</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="14:45" data-start="14:30">14:30 - 14:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="16:15" data-start="16:00">16:00 - 16:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Lanche da Tarde</span>
+<span class="meal-time" data-end="17:00" data-start="16:30">16:30 - 17:00</span>
+</div>
+<div class="meal-content">
+<ul><li>Tapioca com queijo ou pão de fôrma com frango</li><li>Café sem açúcar + 1 fatia de melão</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="19:45" data-start="19:30">19:30 - 19:45</span>
+</div>
+<div class="meal-content">500 ml de água — início da noite.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Jantar</span>
+<span class="meal-time" data-end="20:30" data-start="20:00">20:00 - 20:30</span>
+</div>
+<div class="meal-content">
+<ul><li>1 pão francês + 120–150g de carne moída magra com molho natural e salada</li></ul>
+</div>
+</div>
+</div>
+<div class="day-section" id="sexta">
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="06:00" data-start="05:45">05:45 - 06:00</span>
+</div>
+<div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Pré-Treino (Full Body C)</span>
+<span class="meal-time" data-end="06:20" data-start="05:50">05:50 - 06:20</span>
+</div>
+<div class="meal-content">
+<ul><li>900 ml de água + Creatina + Arginina</li><li>1 banana + 1 col. sopa de mel + café</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="08:00" data-start="07:45">07:45 - 08:00</span>
+</div>
+<div class="meal-content">300 ml de água.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Pós-Treino</span>
+<span class="meal-time" data-end="09:00" data-start="08:30">08:30 - 09:00</span>
+</div>
+<div class="meal-content">
+<ul><li>Shake de Whey com aveia e fruta OU 2 fatias de pão de fôrma + 2 ovos</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="10:15" data-start="10:00">10:00 - 10:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="11:45" data-start="11:30">11:30 - 11:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Almoço</span>
+<span class="meal-time" data-end="13:00" data-start="12:30">12:30 - 13:00</span>
+</div>
+<div class="meal-content">
+<ul><li>4 col. sopa de arroz + feijão</li><li>140–150g de proteína magra: frango, bife bovino grelhado ou carne em tiras</li><li>Salada completa</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="14:45" data-start="14:30">14:30 - 14:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="16:15" data-start="16:00">16:00 - 16:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Lanche da Tarde</span>
+<span class="meal-time" data-end="17:00" data-start="16:30">16:30 - 17:00</span>
+</div>
+<div class="meal-content">
+<ul><li>Pão com ovo/frango ou tapioca</li><li>1 café sem açúcar</li></ul>
+</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="19:45" data-start="19:30">19:30 - 19:45</span>
+</div>
+<div class="meal-content">500 ml de água — início da noite.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Jantar / Opção Social</span>
+<span class="meal-time" data-end="21:00" data-start="20:30">20:30 - 21:00</span>
+</div>
+<div class="meal-content">
+<ul><li>Opção 1: 2 pães franceses com 120–150g de carne moída magra; OU cachorro-quente com salsicha + queijo muçarela, molho de tomate, cebola e tomate; sem batata palha</li><li>Opção 2: Japonês — 12 a 16 peças, priorizando sashimis/niguiris</li><li>Opção 3: Macarrão com molho de tomate + 120–150g de carne bovina em tiras, carne moída ou frango</li></ul>
+</div>
+</div>
+</div>
+<div class="day-section" id="sabado">
+<div class="section-note">🏐 Vôlei: 15:00–18:00. O lanche das 17:00 continua como lembrete para levar algo ou usar como pós-vôlei.</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="06:00" data-start="05:45">05:45 - 06:00</span>
+</div>
+<div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="08:00" data-start="07:45">07:45 - 08:00</span>
+</div>
+<div class="meal-content">300 ml de água.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Pré-Longão</span>
+<span class="meal-time" data-end="06:30" data-start="06:00">06:00 - 06:30</span>
+</div>
+<div class="meal-content"><ul><li>900 ml de água + Creatina + Arginina</li><li>2 fatias de pão com geleia/mel ou 1 banana grande</li><li>1 xícara de café sem açúcar</li></ul><div class="tip-box">Acima de 12 km: considerar gel de carboidrato ou isotônico durante o percurso.</div></div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="10:15" data-start="10:00">10:00 - 10:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="11:45" data-start="11:30">11:30 - 11:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Pós-Longão / Café da Manhã</span>
+<span class="meal-time" data-end="09:30" data-start="09:00">09:00 - 09:30</span>
+</div>
+<div class="meal-content"><ul><li>Shake de Whey + leite + banana + aveia</li><li>OU pão com 2 ovos + fruta</li></ul></div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="14:45" data-start="14:30">14:30 - 14:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="16:15" data-start="16:00">16:00 - 16:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Almoço</span>
+<span class="meal-time" data-end="13:30" data-start="13:00">13:00 - 13:30</span>
+</div>
+<div class="meal-content"><ul><li>4–5 col. sopa de arroz + 1 concha de feijão</li><li>140–150g de frango, bife bovino magro ou carne em tiras</li><li>Legumes e salada</li></ul></div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="19:45" data-start="19:30">19:30 - 19:45</span>
+</div>
+<div class="meal-content">500 ml de água — início da noite.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Lanche da Tarde</span>
+<span class="meal-time" data-end="17:00" data-start="16:30">16:30 - 17:00</span>
+</div>
+<div class="meal-content"><ul><li>Iogurte + fruta + aveia</li><li>OU pão/tapioca com queijo, frango ou ovo</li><li>OU Whey + fruta</li></ul></div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Jantar de Recuperação</span>
+<span class="meal-time" data-end="21:00" data-start="20:30">20:30 - 21:00</span>
+</div>
+<div class="meal-content"><ul><li>Arroz + feijão + 140–150g de carne/frango + legumes/salada</li><li>OU sopa reforçada com legumes + proteína + mandioca/batata/macarrão</li><li>OU shake reforçado com Whey + leite + banana + aveia + iogurte</li></ul></div>
+</div></div>
+<div class="day-section" id="domingo">
+<div class="section-note">🏃 O longão é o padrão do domingo. Se não houver corrida após o vôlei de sábado, use um café da manhã normal no lugar do pré/pós-longão.</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="06:00" data-start="05:45">05:45 - 06:00</span>
+</div>
+<div class="meal-content">900 ml de água ao acordar (Creatina + Arginina).</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Café da Manhã</span>
+<span class="meal-time" data-end="09:00" data-start="08:30">08:30 - 09:00</span>
+</div>
+<div class="meal-content"><ul><li>2 fatias de pão ou 1 pão francês + 2 ovos</li><li>Requeijão light + fruta</li><li>Café sem açúcar</li></ul></div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="08:00" data-start="07:45">07:45 - 08:00</span>
+</div>
+<div class="meal-content">300 ml de água.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Almoço de Domingo</span>
+<span class="meal-time" data-end="13:30" data-start="13:00">13:00 - 13:30</span>
+</div>
+<div class="meal-content"><ul><li>Churrasco eventual: carnes, arroz, farofa moderada, vinagrete/salada e pão de alho se quiser</li><li>OU lasanha de frango + salada</li><li>OU carne de panela com batata/mandioca + arroz + salada</li><li>OU frango assado + arroz + feijão + batata assada + salada</li><li>OU escondidinho de carne ou frango</li></ul><div class="tip-box">Nos domingos com cerveja, intercale com água e mantenha a hidratação.</div></div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="10:15" data-start="10:00">10:00 - 10:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, metade da manhã.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="11:45" data-start="11:30">11:30 - 11:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 1, final da manhã.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Lanche da Tarde</span>
+<span class="meal-time" data-end="17:00" data-start="16:30">16:30 - 17:00</span>
+</div>
+<div class="meal-content"><ul><li>Iogurte + fruta + aveia</li><li>OU pão/tapioca com queijo ou frango</li><li>OU Whey + fruta</li></ul></div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="14:45" data-start="14:30">14:30 - 14:45</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, início da tarde.</div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="16:15" data-start="16:00">16:00 - 16:15</span>
+</div>
+<div class="meal-content">500 ml de água — Garrafa 2, final da tarde.</div>
+</div>
+<div class="meal-card" data-type="meal">
+<div class="meal-header">
+<span class="meal-title">🍽️ Jantar</span>
+<span class="meal-time" data-end="20:30" data-start="20:00">20:00 - 20:30</span>
+</div>
+<div class="meal-content"><ul><li>Sem churrasco: 2–3 fatias de pizza OU 1 hambúrguer artesanal + refrigerante zero</li><li>Com churrasco + cerveja: se houver fome, omelete, sanduíche leve ou Whey/iogurte/fruta</li></ul></div>
+</div>
+<div class="meal-card water-card" data-type="water">
+<div class="meal-header">
+<span class="meal-title water-title">💧 Hidratação</span>
+<span class="meal-time" data-end="19:45" data-start="19:30">19:30 - 19:45</span>
+</div>
+<div class="meal-content">500 ml de água — início da noite.</div>
+</div>
+
+</div>
+<div class="day-section" id="flexivel">
+<div class="macro-table-container">
+<strong style="color:var(--primary);font-size:.95rem;">🎯 Metas de Macronutrientes por Tipo de Dia</strong>
+<table class="macro-table">
+<thead>
+<tr>
+<th>Dia / Atividade</th>
+<th>Calorias</th>
+<th>Proteínas</th>
+<th>Carbs</th>
+<th>Gorduras</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Seg/Ter/Qui</strong></td>
+<td>~2.000 kcal</td>
+<td>150g</td>
+<td>210g</td>
+<td>55g</td>
+</tr>
+<tr>
+<td><strong>Qua/Sex</strong></td>
+<td>~2.150 kcal</td>
+<td>150g</td>
+<td>240g</td>
+<td>55g</td>
+</tr>
+<tr>
+<td><strong>Sábado</strong></td>
+<td>~2.300 kcal</td>
+<td>140g</td>
+<td>240g</td>
+<td>70g</td>
+</tr>
+<tr>
+<td><strong>Domingo</strong></td>
+<td>~2.400 kcal</td>
+<td>150g</td>
+<td>280g</td>
+<td>60g</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="substitutions-grid">
+<div class="sub-card">
+<div class="sub-title">🥩 Equivalência de Proteínas</div>
+<ul>
+<li><strong>140g de peito de frango:</strong> aproximadamente 140–150g de bife bovino magro grelhado ou carne bovina em tiras.</li>
+<li>Boas opções: patinho, coxão mole e alcatra com pouca gordura aparente.</li>
+<li><strong>Peito de frango (140g):</strong> também pode ser substituído por 150g de peixe, 130g de bife de porco ou 4 ovos.</li>
+</ul>
+</div>
+<div class="sub-card">
+<div class="sub-title">🔄 Substituições Rápidas de Carboidratos</div>
+<ul>
+<li><strong>4 col. sopa de arroz:</strong> 120g de batata cozida / 100g de mandioca / 100g de macarrão.</li>
+<li><strong>2 fatias de pão de fôrma:</strong> 1 pão francês sem miolo / 1 tapioca média (40g).</li>
+</ul>
+</div>
+<div class="sub-card">
+<div class="sub-title">🍺 Churrasco e Cerveja no Domingo</div>
+<ul>
+<li>Os domingos de churrasco são uma opção eventual, cerca de 2 vezes ao longo do ciclo.</li>
+<li>Intercale cerveja com água e mantenha a hidratação ao longo da tarde.</li>
+<li>Se o almoço já foi mais livre, prefira um jantar leve caso sinta fome.</li>
+</ul>
+</div>
+<div class="sub-card">
+<div class="sub-title">🧘 Domingo de Recuperação</div>
+<ul><li>Domingo é o dia de descanso total do ciclo de treino.</li><li>Mantenha alimentação normal e hidratação; mobilidade leve é opcional.</li></ul>
+</div>
+<div class="sub-card">
+<div class="sub-title">🍕 Refeição Livre</div>
+<ul>
+<li>Pizza ou hambúrguer ficam preferencialmente no domingo à noite quando não houver churrasco.</li>
+<li>No sábado pós-longão, priorize recuperação com proteína, carboidrato e hidratação.</li>
+</ul>
+</div>
+<div class="sub-card">
+<div class="sub-title">💡 Regra 80/20</div>
+<ul>
+<li>Use o plano como base da rotina e mantenha flexibilidade em refeições sociais sem transformar exceções em padrão.</li>
+<li>Ao trocar uma refeição, procure preservar principalmente a fonte de proteína e a estrutura geral do dia.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="footer-note">Plano integrado de 16 semanas: alimentação, hidratação e treino. Notificações apenas para alimentação e hidratação.</div>
+</section><section class="app-screen" id="screen-training">
+<div class="screen-topbar"><button class="back-button" onclick="openScreen('home')">‹</button><div class="screen-title"><h2>Treinos</h2><p>Full Body + corrida • meta 21,1 km</p></div></div>
+<div class="training-tabs">
+<button class="training-tab-btn active" data-training-tab="week" onclick="switchTrainingTab('week')">Semana</button>
+<button class="training-tab-btn" data-training-tab="fullbody" onclick="switchTrainingTab('fullbody')">Full Body</button>
+<button class="training-tab-btn" data-training-tab="running" onclick="switchTrainingTab('running')">Corrida</button>
+</div>
+<div class="training-panel active" id="training-week">
+<div class="training-summary"><div class="training-summary-top"><strong id="training-current-week">Semana 1/16</strong><span id="training-phase">Base &amp; adaptação</span></div><div class="run-progression"><div><b>10 km</b>início</div><div><b>14–15 km</b>meio</div><div><b>18–20 km</b>pico</div><div><b>21,1 km</b>meta</div></div></div>
+<div id="weekly-training-list"></div>
+<div class="load-monitor"><h3>⚠️ Monitoramento de carga</h3><ul><li>Dor leve e estável, sem mudar a passada: monitorar.</li><li>Se aumentar durante/depois do treino: reduzir impacto, volume ou intensidade.</li><li>Se alterar a passada, houver inchaço, perda de força ou piora importante: interromper impacto e procurar avaliação.</li></ul></div>
+</div>
+<div class="training-panel" id="training-fullbody">
+<div class="exercise-card"><h3>🔴 Full Body A • segunda</h3>
+<div class="exercise-row"><b>Supino inclinado com halteres</b><span>3 × 6–10</span></div><div class="exercise-row"><b>Puxada frontal</b><span>3 × 8–10</span></div><div class="exercise-row"><b>Búlgaro ou Hack</b><span>3 × 8–10</span></div><div class="exercise-row"><b>RDL / Stiff</b><span>2 × 8–10</span></div><div class="exercise-row"><b>Elevação lateral</b><span>3 × 12–15</span></div><div class="exercise-row"><b>Cable Crunch</b><span>3 × 10–15</span></div><div class="tip-box"><strong>Cardio:</strong> esteira inclinada leve, 15–20 min em Z2.</div>
+</div>
+<div class="exercise-card"><h3>🟢 Full Body B • quarta</h3>
+<div class="exercise-row"><b>RDL / Stiff</b><span>3 × 6–10</span></div><div class="exercise-row"><b>Desenvolvimento com halteres</b><span>3 × 8–10</span></div><div class="exercise-row"><b>Remada baixa/apoiada</b><span>3 × 8–12</span></div><div class="exercise-row"><b>Leg Press ou agachamento</b><span>3 × 8–12</span></div><div class="exercise-row"><b>Crucifixo inverso</b><span>2–3 × 12–15</span></div><div class="exercise-row"><b>Rosca direta + tríceps pulley</b><span>2–3 × 10–12</span></div><div class="tip-box"><strong>Cardio:</strong> por enquanto, bike/elíptico leve 10–15 min em vez de corda, até avaliar o Aquiles.</div>
+</div>
+<div class="exercise-card"><h3>🔵 Full Body C • sexta</h3>
+<div class="exercise-row"><b>Supino inclinado</b><span>3 × 6–8</span></div><div class="exercise-row"><b>Remada</b><span>3 × 6–10</span></div><div class="exercise-row"><b>Leg Press / Hack</b><span>3 × 8–10</span></div><div class="exercise-row"><b>Flexora</b><span>3 × 10–12</span></div><div class="exercise-row"><b>Elevação lateral unilateral</b><span>3 × 12–15</span></div><div class="exercise-row"><b>Rosca martelo + tríceps testa</b><span>2–3 × 10–12</span></div><div class="exercise-row"><b>Prancha com peso</b><span>3 séries</span></div><div class="tip-box"><strong>Cardio:</strong> esteira inclinada leve 10–15 min. Preserve as pernas para o longão.</div>
+</div>
+<div class="phase-card"><strong>Progressão</strong><p>Trabalhe normalmente com ~RIR 2. Ao atingir o topo da faixa com técnica boa, aumente a carga de forma pequena.</p></div>
+</div>
+<div class="training-panel" id="training-running">
+<div class="training-summary" id="current-running-week"></div>
+<div class="pre-run-box"><h3>🏃 Protocolo pré-corrida • 6–8 min</h3><ol><li>Mobilidade de tornozelo: 10 repetições por lado.</li><li>Caminhada nos calcanhares: 2 × 20–30 s.</li><li>Panturrilha leve: 1–2 × 12–15.</li><li>Marcha/skipping leve: 30–60 s.</li><li>Caminhada/trote fácil: 3–5 min.</li><li>Nos tiros: 2–4 acelerações progressivas de 15–20 s, somente se estiver sem dor relevante.</li></ol></div>
+<div id="running-plan-list"></div>
+</div>
+</section><nav aria-label="Navegação principal" class="bottom-nav"><button class="active" data-screen-nav="home" onclick="openScreen('home')"><span>⌂</span>Início</button><button data-screen-nav="food" onclick="openScreen('food')"><span>🍽️</span>Alimentação</button><button data-screen-nav="training" onclick="openScreen('training','week')"><span>🏋️</span>Treinos</button></nav></div>
 <script src="js/app.js"></script>
 </body>
 </html>

@@ -185,13 +185,13 @@ function atualizarMacrosDoDia() {
     const hoje = new Date().getDay();
 
     const metas = {
-        0: { calorias: "2.400 kcal", proteina: "150g", carbo: "280g", gordura: "60g" },
+        0: { calorias: "2.300 kcal", proteina: "140g", carbo: "240g", gordura: "70g" },
         1: { calorias: "2.000 kcal", proteina: "150g", carbo: "210g", gordura: "55g" },
         2: { calorias: "2.000 kcal", proteina: "150g", carbo: "210g", gordura: "55g" },
         3: { calorias: "2.150 kcal", proteina: "150g", carbo: "240g", gordura: "55g" },
         4: { calorias: "2.000 kcal", proteina: "150g", carbo: "210g", gordura: "55g" },
         5: { calorias: "2.150 kcal", proteina: "150g", carbo: "240g", gordura: "55g" },
-        6: { calorias: "2.300 kcal", proteina: "140g", carbo: "240g", gordura: "70g" }
+        6: { calorias: "2.400 kcal", proteina: "150g", carbo: "280g", gordura: "60g" }
     };
 
     const metaHoje = metas[hoje];
@@ -380,12 +380,12 @@ function atualizarProximaHidratacao() {
 }
 
 // ======================================================
-// PROGRESSO DO CICLO DE 8 SEMANAS
+// PROGRESSO DO CICLO INTEGRADO DE 16 SEMANAS
 // ======================================================
 
 function atualizarProgressoCiclo() {
-    const dataInicio = new Date(2026, 9, 5);
-    const totalSemanas = 8;
+    const dataInicio = new Date(2026, 9, 25);
+    const totalSemanas = 16;
     const totalDias = totalSemanas * 7;
 
     dataInicio.setHours(0, 0, 0, 0);
@@ -425,7 +425,7 @@ function atualizarProgressoCiclo() {
     }
 
     if (concluido) {
-        semanaElemento.textContent = "Ciclo concluído • 8/8";
+        semanaElemento.textContent = "Ciclo concluído • 16/16";
         percentualElemento.textContent = "100%";
         periodoElemento.textContent = `Ciclo: ${formatar(dataInicio)} a ${formatar(fimCiclo)}`;
     } else if (hoje < dataInicio) {
@@ -435,7 +435,7 @@ function atualizarProgressoCiclo() {
         barraElemento.style.width = "0%";
         return;
     } else {
-        semanaElemento.textContent = `Semana ${semanaAtual}/8`;
+        semanaElemento.textContent = `Semana ${semanaAtual}/16`;
         percentualElemento.textContent = `${percentual.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
         periodoElemento.textContent = `${formatar(inicioSemana)} a ${formatar(fimSemana)}`;
     }
@@ -628,6 +628,130 @@ function configurarBotaoNotificacoes() {
     atualizarStatusNotificacoes();
 }
 
+
+
+// ======================================================
+// NAVEGAÇÃO PRINCIPAL / TREINOS
+// ======================================================
+
+const INICIO_CICLO = new Date(2026, 9, 25);
+const TOTAL_SEMANAS = 16;
+
+const PLANO_CORRIDA_16_SEMANAS = [
+    { semana: 1, fase: "Base & adaptação", terca: "6 km Z2 + bloco moderado curto", quinta: "Funcional intenso", sabado: "10 km Z2" },
+    { semana: 2, fase: "Base & adaptação", terca: "7 km Z2", quinta: "Tiros: 6 × 400 m, recuperação leve", sabado: "11 km Z2" },
+    { semana: 3, fase: "Base & adaptação", terca: "7–8 km com 3 km moderados", quinta: "Funcional intenso", sabado: "12 km Z2" },
+    { semana: 4, fase: "Redução", terca: "6 km leve", quinta: "Tiros controlados: 4 × 400 m", sabado: "9–10 km Z2" },
+    { semana: 5, fase: "Desenvolvimento", terca: "8 km com bloco de ritmo", quinta: "Funcional intenso", sabado: "13 km Z2" },
+    { semana: 6, fase: "Desenvolvimento", terca: "8 km Z2", quinta: "Tiros: 4–5 × 800 m", sabado: "14 km Z2" },
+    { semana: 7, fase: "Desenvolvimento", terca: "8–9 km com ritmo", quinta: "Funcional intenso", sabado: "15 km Z2" },
+    { semana: 8, fase: "Redução", terca: "7 km leve", quinta: "Tiros reduzidos: 4 × 400 m", sabado: "11–12 km Z2" },
+    { semana: 9, fase: "Específica 21K", terca: "9 km com trecho moderado", quinta: "Funcional intenso", sabado: "16 km Z2" },
+    { semana: 10, fase: "Específica 21K", terca: "8–9 km Z2", quinta: "Tiros: 4–5 × 1 km", sabado: "17 km Z2" },
+    { semana: 11, fase: "Específica 21K", terca: "9–10 km com ritmo sustentado", quinta: "Funcional intenso", sabado: "18 km Z2" },
+    { semana: 12, fase: "Redução", terca: "7–8 km leve", quinta: "Tiros controlados, volume reduzido", sabado: "13–14 km Z2" },
+    { semana: 13, fase: "Pico específico", terca: "9–10 km com ritmo", quinta: "Funcional intenso", sabado: "18 km Z2" },
+    { semana: 14, fase: "Pico específico", terca: "8 km Z2", quinta: "Último treino forte de tiros: 4 × 1 km", sabado: "19–20 km Z2" },
+    { semana: 15, fase: "Taper", terca: "7 km leve", quinta: "Funcional moderado, sem buscar fadiga máxima", sabado: "12–14 km Z2" },
+    { semana: 16, fase: "Taper & meta", terca: "5–6 km leve", quinta: "Corrida curta + 2–4 acelerações", sabado: "21,1 km • meta" }
+];
+
+function obterSemanaCiclo() {
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
+    const inicio = new Date(INICIO_CICLO); inicio.setHours(0,0,0,0);
+    const dias = Math.floor((hoje - inicio) / 86400000);
+    let semana = Math.floor(dias / 7) + 1;
+    if (semana < 1) semana = 1;
+    if (semana > TOTAL_SEMANAS) semana = TOTAL_SEMANAS;
+    return semana;
+}
+
+function openScreen(screen, trainingTab = null) {
+    document.querySelectorAll('.app-screen').forEach(el => el.classList.remove('active'));
+    const target = document.getElementById(`screen-${screen}`);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('[data-screen-nav]').forEach(btn => btn.classList.toggle('active', btn.dataset.screenNav === screen));
+    if (screen === 'training' && trainingTab) switchTrainingTab(trainingTab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+window.openScreen = openScreen;
+
+function openFoodTab(dayId) {
+    openScreen('food');
+    switchTab(dayId);
+}
+window.openFoodTab = openFoodTab;
+
+function openFoodToday() {
+    openScreen('food');
+    abrirDiaAtual();
+}
+window.openFoodToday = openFoodToday;
+
+function switchTrainingTab(tab) {
+    document.querySelectorAll('.training-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.training-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`training-${tab}`)?.classList.add('active');
+    document.querySelector(`[data-training-tab="${tab}"]`)?.classList.add('active');
+}
+window.switchTrainingTab = switchTrainingTab;
+
+function atualizarResumoHome() {
+    const semana = obterSemanaCiclo();
+    const percentual = (semana / TOTAL_SEMANAS) * 100;
+    const inicio = new Date(INICIO_CICLO); inicio.setDate(inicio.getDate() + (semana - 1) * 7);
+    const fim = new Date(inicio); fim.setDate(inicio.getDate() + 6);
+    const f = d => d.toLocaleDateString('pt-BR');
+    document.getElementById('home-cycle-week').textContent = `Semana ${semana}/16`;
+    document.getElementById('home-cycle-percentage').textContent = `${percentual.toLocaleString('pt-BR',{maximumFractionDigits:1})}%`;
+    document.getElementById('home-cycle-period').textContent = `${f(inicio)} a ${f(fim)}`;
+    document.getElementById('home-cycle-progress-fill').style.width = `${percentual}%`;
+}
+
+function treinamentoDoDia() {
+    const semana = obterSemanaCiclo();
+    const plano = PLANO_CORRIDA_16_SEMANAS[semana - 1];
+    const dia = new Date().getDay();
+    const mapa = {
+        1: 'Full Body A + esteira inclinada 15–20 min',
+        2: `Corrida • ${plano.terca}`,
+        3: 'Full Body B + bike/elíptico leve 10–15 min',
+        4: plano.quinta,
+        5: 'Full Body C + esteira inclinada 10–15 min',
+        6: `Longão • ${plano.sabado}`,
+        0: 'Descanso total • mobilidade leve opcional'
+    };
+    return mapa[dia];
+}
+
+function renderizarSemanaTreino() {
+    const semana = obterSemanaCiclo();
+    const plano = PLANO_CORRIDA_16_SEMANAS[semana - 1];
+    document.getElementById('training-current-week').textContent = `Semana ${semana}/16`;
+    document.getElementById('training-phase').textContent = plano.fase;
+    document.getElementById('home-today-training').textContent = treinamentoDoDia();
+
+    const dias = [
+        ['SEG','Full Body A + Esteira leve','Força total • esteira inclinada 15–20 min Z2','strength'],
+        ['TER','Corrida',plano.terca,'run'],
+        ['QUA','Full Body B + Cardio leve','Força total • bike/elíptico 10–15 min','strength'],
+        ['QUI',plano.quinta, plano.quinta.includes('Funcional') ? 'Aula intensa com a professora' : 'Sessão de qualidade da corrida','run'],
+        ['SEX','Full Body C + Esteira leve','Força total • esteira inclinada 10–15 min','strength'],
+        ['SÁB','Longão',plano.sabado,'run'],
+        ['DOM','Descanso total','Recovery • mobilidade leve opcional','rest']
+    ];
+    const root=document.getElementById('weekly-training-list');
+    root.innerHTML=dias.map(([d,t,det,type])=>`<div class="training-card"><div class="training-day ${type==='run'?'run':type==='rest'?'rest':''}">${d}</div><div><h3>${t}</h3><p>${det}</p></div></div>`).join('');
+
+    document.getElementById('current-running-week').innerHTML=`<div class="training-summary-top"><strong>Semana ${semana}/16 • ${plano.fase}</strong><span>Meta 21,1 km</span></div><p style="margin:8px 0 0;font-size:.76rem;color:#475569"><b>Terça:</b> ${plano.terca}<br><b>Quinta:</b> ${plano.quinta}<br><b>Sábado:</b> ${plano.sabado}</p>`;
+}
+
+function renderizarPlanoCorridaCompleto() {
+    const root=document.getElementById('running-plan-list');
+    root.innerHTML=PLANO_CORRIDA_16_SEMANAS.map(p=>`<div class="phase-card"><strong>Semana ${p.semana} • ${p.fase}</strong><p>Ter: ${p.terca}<br>Qui: ${p.quinta}<br>Sáb: ${p.sabado}</p></div>`).join('');
+}
+
 // ======================================================
 // INICIALIZAÇÃO
 // ======================================================
@@ -636,6 +760,9 @@ document.addEventListener("DOMContentLoaded", () => {
     abrirDiaAtual();
     atualizarMacrosDoDia();
     atualizarProgressoCiclo();
+    atualizarResumoHome();
+    renderizarSemanaTreino();
+    renderizarPlanoCorridaCompleto();
     atualizarProximaRefeicao();
     atualizarProximaHidratacao();
     configurarBotaoNotificacoes();
