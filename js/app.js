@@ -753,6 +753,113 @@ function renderizarPlanoCorridaCompleto() {
 }
 
 // ======================================================
+// TIMER DE DESCANSO DO FULL BODY
+// ======================================================
+
+let descansoOriginalSegundos = 90;
+let descansoRestanteSegundos = 90;
+let descansoEmExecucao = false;
+let intervaloDescanso = null;
+
+function formatarTimerDescanso(segundos) {
+    const negativo = segundos < 0;
+    const absoluto = Math.abs(segundos);
+    const minutos = Math.floor(absoluto / 60);
+    const segundosRestantes = absoluto % 60;
+    return `${negativo ? "-" : ""}${String(minutos).padStart(2, "0")}:${String(segundosRestantes).padStart(2, "0")}`;
+}
+
+function atualizarInterfaceTimerDescanso() {
+    const display = document.getElementById("rest-timer-display");
+    const status = document.getElementById("rest-timer-status");
+    const botaoToggle = document.getElementById("rest-toggle-button");
+
+    if (!display || !status || !botaoToggle) return;
+
+    display.textContent = formatarTimerDescanso(descansoRestanteSegundos);
+    display.classList.toggle("overtime", descansoRestanteSegundos < 0);
+
+    if (descansoEmExecucao) {
+        botaoToggle.textContent = "⏸ Parar";
+        status.textContent = descansoRestanteSegundos < 0 ? "Tempo excedido" : `Descanso de ${descansoOriginalSegundos}s`;
+    } else {
+        botaoToggle.textContent = "▶ Play";
+        status.textContent = descansoRestanteSegundos < 0 ? "Parado no tempo excedido" : `Preparado • ${descansoOriginalSegundos}s`;
+    }
+
+    document.querySelectorAll("[data-rest-seconds]").forEach(botao => {
+        botao.classList.toggle(
+            "active",
+            Number(botao.dataset.restSeconds) === descansoOriginalSegundos
+        );
+    });
+}
+
+function pararTimerDescanso() {
+    descansoEmExecucao = false;
+    if (intervaloDescanso) {
+        clearInterval(intervaloDescanso);
+        intervaloDescanso = null;
+    }
+    atualizarInterfaceTimerDescanso();
+}
+
+function iniciarTimerDescanso() {
+    if (descansoEmExecucao) return;
+
+    descansoEmExecucao = true;
+    atualizarInterfaceTimerDescanso();
+
+    intervaloDescanso = setInterval(() => {
+        descansoRestanteSegundos -= 1;
+        atualizarInterfaceTimerDescanso();
+    }, 1000);
+}
+
+function selecionarTempoDescanso(segundos) {
+    pararTimerDescanso();
+    descansoOriginalSegundos = segundos;
+    descansoRestanteSegundos = segundos;
+    iniciarTimerDescanso();
+}
+
+function reiniciarTimerDescanso() {
+    pararTimerDescanso();
+    descansoRestanteSegundos = descansoOriginalSegundos;
+    atualizarInterfaceTimerDescanso();
+}
+
+function adicionarTempoDescanso(segundos = 30) {
+    descansoRestanteSegundos += segundos;
+    atualizarInterfaceTimerDescanso();
+}
+
+function configurarTimerDescanso() {
+    const botaoToggle = document.getElementById("rest-toggle-button");
+    const botaoReset = document.getElementById("rest-reset-button");
+    const botaoAdd = document.getElementById("rest-add-button");
+
+    document.querySelectorAll("[data-rest-seconds]").forEach(botao => {
+        botao.addEventListener("click", () => {
+            selecionarTempoDescanso(Number(botao.dataset.restSeconds));
+        });
+    });
+
+    botaoToggle?.addEventListener("click", () => {
+        if (descansoEmExecucao) {
+            pararTimerDescanso();
+        } else {
+            iniciarTimerDescanso();
+        }
+    });
+
+    botaoReset?.addEventListener("click", reiniciarTimerDescanso);
+    botaoAdd?.addEventListener("click", () => adicionarTempoDescanso(30));
+
+    atualizarInterfaceTimerDescanso();
+}
+
+// ======================================================
 // INICIALIZAÇÃO
 // ======================================================
 
@@ -763,6 +870,7 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarResumoHome();
     renderizarSemanaTreino();
     renderizarPlanoCorridaCompleto();
+    configurarTimerDescanso();
     atualizarProximaRefeicao();
     atualizarProximaHidratacao();
     configurarBotaoNotificacoes();
