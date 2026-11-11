@@ -725,139 +725,105 @@ function treinamentoDoDia() {
     return mapa[dia];
 }
 
+function dataInicioDaSemana(numeroSemana) {
+    const inicio = new Date(INICIO_CICLO);
+    inicio.setHours(0, 0, 0, 0);
+    inicio.setDate(inicio.getDate() + (numeroSemana - 1) * 7);
+    return inicio;
+}
+
+function formatarDataCurta(data) {
+    return data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+}
+
+function formatarDataCompleta(data) {
+    return data.toLocaleDateString("pt-BR");
+}
+
+function periodoDaSemana(numeroSemana) {
+    const inicio = dataInicioDaSemana(numeroSemana);
+    const fim = new Date(inicio);
+    fim.setDate(inicio.getDate() + 6);
+    return { inicio, fim };
+}
+
 function renderizarSemanaTreino() {
     const semana = obterSemanaCiclo();
     const plano = PLANO_CORRIDA_16_SEMANAS[semana - 1];
-    document.getElementById('training-current-week').textContent = `Semana ${semana}/16`;
-    document.getElementById('training-phase').textContent = plano.fase;
-    document.getElementById('home-today-training').textContent = treinamentoDoDia();
+    const { inicio, fim } = periodoDaSemana(semana);
 
-    const dias = [
-        ['SEG','Full Body A + Esteira leve','Força total • esteira inclinada 15–20 min Z2','strength'],
-        ['TER','Corrida',plano.terca,'run'],
-        ['QUA','Full Body B + Cardio leve','Força total • bike/elíptico 10–15 min','strength'],
-        ['QUI',plano.quinta, plano.quinta.includes('Funcional') ? 'Aula intensa com a professora' : 'Sessão de qualidade da corrida','run'],
-        ['SEX','Full Body C + Esteira leve','Força total • esteira inclinada 10–15 min','strength'],
-        ['SÁB','Longão',plano.sabado,'run'],
-        ['DOM','Descanso total','Recovery • mobilidade leve opcional','rest']
+    document.getElementById("training-current-week").textContent = `Semana ${semana}/16`;
+    document.getElementById("training-phase").textContent = plano.fase;
+    document.getElementById("training-week-period").textContent = `${formatarDataCompleta(inicio)} a ${formatarDataCompleta(fim)}`;
+    document.getElementById("home-today-training").textContent = treinamentoDoDia();
+
+    const atividades = [
+        { offset:0, sigla:"DOM", titulo:"Descanso total", detalhe:"Recovery • mobilidade leve opcional", tipo:"rest", icone:"🌿", curto:"Descanso" },
+        { offset:1, sigla:"SEG", titulo:"Full Body A + Esteira leve", detalhe:"Força total • esteira inclinada 15–20 min Z2", tipo:"strength", icone:"🏋️", curto:"FB A" },
+        { offset:2, sigla:"TER", titulo:"Corrida", detalhe:plano.terca, tipo:"run", icone:"🏃", curto:"Corrida" },
+        { offset:3, sigla:"QUA", titulo:"Full Body B + Cardio leve", detalhe:"Força total • bike/elíptico 10–15 min", tipo:"strength", icone:"🏋️", curto:"FB B" },
+        { offset:4, sigla:"QUI", titulo:plano.quinta, detalhe:plano.quinta.includes("Funcional") ? "Aula intensa com a professora" : "Sessão de qualidade da corrida", tipo:"run", icone:plano.quinta.includes("Funcional") ? "⚡" : "🏃", curto:plano.quinta.includes("Funcional") ? "Funcional" : "Tiros" },
+        { offset:5, sigla:"SEX", titulo:"Full Body C + Esteira leve", detalhe:"Força total • esteira inclinada 10–15 min", tipo:"strength", icone:"🏋️", curto:"FB C" },
+        { offset:6, sigla:"SÁB", titulo:"Longão", detalhe:plano.sabado, tipo:"run", icone:"🏃", curto:"Longão" }
     ];
-    const root=document.getElementById('weekly-training-list');
-    root.innerHTML=dias.map(([d,t,det,type])=>`<div class="training-card"><div class="training-day ${type==='run'?'run':type==='rest'?'rest':''}">${d}</div><div><h3>${t}</h3><p>${det}</p></div></div>`).join('');
 
-    document.getElementById('current-running-week').innerHTML=`<div class="training-summary-top"><strong>Semana ${semana}/16 • ${plano.fase}</strong><span>Meta 21,1 km</span></div><p style="margin:8px 0 0;font-size:.76rem;color:#475569"><b>Terça:</b> ${plano.terca}<br><b>Quinta:</b> ${plano.quinta}<br><b>Sábado:</b> ${plano.sabado}</p>`;
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
+    const dias = atividades.map(item => {
+        const data = new Date(inicio);
+        data.setDate(inicio.getDate() + item.offset);
+        return { ...item, data };
+    });
+
+    document.getElementById("training-week-days").innerHTML = dias.map(item => {
+        const ehHoje = item.data.getTime() === hoje.getTime();
+        return `<div class="week-day-chip ${ehHoje ? "today" : ""}" title="${item.titulo}"><span class="wd-name">${item.sigla}</span><span class="wd-date">${formatarDataCurta(item.data)}</span><span class="wd-icon">${item.icone}</span><span class="wd-short">${item.curto}</span></div>`;
+    }).join("");
+
+    document.getElementById("weekly-training-list").innerHTML = dias.map(item => `<div class="training-card"><div class="training-day ${item.tipo === "run" ? "run" : item.tipo === "rest" ? "rest" : ""}">${item.sigla}<span class="training-date">${formatarDataCurta(item.data)}</span></div><div><h3>${item.titulo}</h3><p>${item.detalhe}</p></div></div>`).join("");
+
+    document.getElementById("current-running-week").innerHTML = `<div class="training-summary-top"><strong>Semana ${semana}/16 • ${plano.fase}</strong><span>${formatarDataCurta(inicio)}–${formatarDataCurta(fim)}</span></div><p style="margin:8px 0 0;font-size:.76rem;color:#475569"><b>Terça:</b> ${plano.terca}<br><b>Quinta:</b> ${plano.quinta}<br><b>Sábado:</b> ${plano.sabado}</p>`;
 }
 
 function renderizarPlanoCorridaCompleto() {
-    const root=document.getElementById('running-plan-list');
-    root.innerHTML=PLANO_CORRIDA_16_SEMANAS.map(p=>`<div class="phase-card"><strong>Semana ${p.semana} • ${p.fase}</strong><p>Ter: ${p.terca}<br>Qui: ${p.quinta}<br>Sáb: ${p.sabado}</p></div>`).join('');
+    const root = document.getElementById("running-plan-list");
+    const semanaAtual = obterSemanaCiclo();
+    root.innerHTML = PLANO_CORRIDA_16_SEMANAS.map(p => {
+        const { inicio, fim } = periodoDaSemana(p.semana);
+        return `<div class="phase-card ${p.semana === semanaAtual ? "current-week" : ""}"><strong>Semana ${p.semana} • ${p.fase}</strong><span class="phase-date">${formatarDataCompleta(inicio)} a ${formatarDataCompleta(fim)}</span><p>Ter: ${p.terca}<br>Qui: ${p.quinta}<br>Sáb: ${p.sabado}</p></div>`;
+    }).join("");
 }
+
+function switchFullBodyTab(tab) {
+    document.querySelectorAll(".fullbody-panel").forEach(panel => panel.classList.remove("active"));
+    document.querySelectorAll(".fullbody-subtab-btn").forEach(btn => btn.classList.remove("active"));
+    document.getElementById(`fullbody-${tab}`)?.classList.add("active");
+    document.querySelector(`[data-fullbody-tab="${tab}"]`)?.classList.add("active");
+}
+window.switchFullBodyTab = switchFullBodyTab;
 
 // ======================================================
-// TIMER DE DESCANSO DO FULL BODY
+// TIMERS DE DESCANSO DO FULL BODY
+// Baseados no relógio real para sobreviver à suspensão do app.
 // ======================================================
 
-let descansoOriginalSegundos = 90;
-let descansoRestanteSegundos = 90;
-let descansoEmExecucao = false;
-let intervaloDescanso = null;
+const timersDescanso = {};
+let intervaloGlobalDescanso = null;
 
-function formatarTimerDescanso(segundos) {
-    const negativo = segundos < 0;
-    const absoluto = Math.abs(segundos);
-    const minutos = Math.floor(absoluto / 60);
-    const segundosRestantes = absoluto % 60;
-    return `${negativo ? "-" : ""}${String(minutos).padStart(2, "0")}:${String(segundosRestantes).padStart(2, "0")}`;
-}
-
-function atualizarInterfaceTimerDescanso() {
-    const display = document.getElementById("rest-timer-display");
-    const status = document.getElementById("rest-timer-status");
-    const botaoToggle = document.getElementById("rest-toggle-button");
-
-    if (!display || !status || !botaoToggle) return;
-
-    display.textContent = formatarTimerDescanso(descansoRestanteSegundos);
-    display.classList.toggle("overtime", descansoRestanteSegundos < 0);
-
-    if (descansoEmExecucao) {
-        botaoToggle.textContent = "⏸ Parar";
-        status.textContent = descansoRestanteSegundos < 0 ? "Tempo excedido" : `Descanso de ${descansoOriginalSegundos}s`;
-    } else {
-        botaoToggle.textContent = "▶ Play";
-        status.textContent = descansoRestanteSegundos < 0 ? "Parado no tempo excedido" : `Preparado • ${descansoOriginalSegundos}s`;
-    }
-
-    document.querySelectorAll("[data-rest-seconds]").forEach(botao => {
-        botao.classList.toggle(
-            "active",
-            Number(botao.dataset.restSeconds) === descansoOriginalSegundos
-        );
-    });
-}
-
-function pararTimerDescanso() {
-    descansoEmExecucao = false;
-    if (intervaloDescanso) {
-        clearInterval(intervaloDescanso);
-        intervaloDescanso = null;
-    }
-    atualizarInterfaceTimerDescanso();
-}
-
-function iniciarTimerDescanso() {
-    if (descansoEmExecucao) return;
-
-    descansoEmExecucao = true;
-    atualizarInterfaceTimerDescanso();
-
-    intervaloDescanso = setInterval(() => {
-        descansoRestanteSegundos -= 1;
-        atualizarInterfaceTimerDescanso();
-    }, 1000);
-}
-
-function selecionarTempoDescanso(segundos) {
-    pararTimerDescanso();
-    descansoOriginalSegundos = segundos;
-    descansoRestanteSegundos = segundos;
-    iniciarTimerDescanso();
-}
-
-function reiniciarTimerDescanso() {
-    pararTimerDescanso();
-    descansoRestanteSegundos = descansoOriginalSegundos;
-    atualizarInterfaceTimerDescanso();
-}
-
-function adicionarTempoDescanso(segundos = 30) {
-    descansoRestanteSegundos += segundos;
-    atualizarInterfaceTimerDescanso();
-}
-
-function configurarTimerDescanso() {
-    const botaoToggle = document.getElementById("rest-toggle-button");
-    const botaoReset = document.getElementById("rest-reset-button");
-    const botaoAdd = document.getElementById("rest-add-button");
-
-    document.querySelectorAll("[data-rest-seconds]").forEach(botao => {
-        botao.addEventListener("click", () => {
-            selecionarTempoDescanso(Number(botao.dataset.restSeconds));
-        });
-    });
-
-    botaoToggle?.addEventListener("click", () => {
-        if (descansoEmExecucao) {
-            pararTimerDescanso();
-        } else {
-            iniciarTimerDescanso();
-        }
-    });
-
-    botaoReset?.addEventListener("click", reiniciarTimerDescanso);
-    botaoAdd?.addEventListener("click", () => adicionarTempoDescanso(30));
-
-    atualizarInterfaceTimerDescanso();
-}
+function estadoPadraoTimer() { return { originalSegundos:90, restanteSegundos:90, emExecucao:false, alvoTimestamp:null }; }
+function chaveStorageTimer(id) { return `plano-hibrido:timer-descanso:${id}`; }
+function carregarEstadoTimer(id) { try { const salvo=localStorage.getItem(chaveStorageTimer(id)); const estado=salvo?{...estadoPadraoTimer(),...JSON.parse(salvo)}:estadoPadraoTimer(); if(estado.emExecucao&&estado.alvoTimestamp) estado.restanteSegundos=Math.ceil((estado.alvoTimestamp-Date.now())/1000); return estado; } catch { return estadoPadraoTimer(); } }
+function salvarEstadoTimer(id) { try { localStorage.setItem(chaveStorageTimer(id),JSON.stringify(timersDescanso[id])); } catch {} }
+function atualizarRestantePeloRelogio(estado) { if(estado.emExecucao&&estado.alvoTimestamp) estado.restanteSegundos=Math.ceil((estado.alvoTimestamp-Date.now())/1000); }
+function formatarTimerDescanso(segundos) { const negativo=segundos<0; const abs=Math.abs(segundos); return `${negativo?"-":""}${String(Math.floor(abs/60)).padStart(2,"0")}:${String(abs%60).padStart(2,"0")}`; }
+function atualizarInterfaceTimer(id) { const card=document.querySelector(`[data-timer-id="${id}"]`); const estado=timersDescanso[id]; if(!card||!estado)return; atualizarRestantePeloRelogio(estado); const display=card.querySelector('[data-role="display"]'); const status=card.querySelector('[data-role="status"]'); const toggle=card.querySelector('[data-role="toggle"]'); display.textContent=formatarTimerDescanso(estado.restanteSegundos); display.classList.toggle("overtime",estado.restanteSegundos<0); toggle.textContent=estado.emExecucao?"⏸ Parar":"▶ Play"; status.textContent=estado.emExecucao?(estado.restanteSegundos<0?"Tempo excedido":`Descanso de ${estado.originalSegundos}s`):(estado.restanteSegundos<0?"Parado no tempo excedido":`Preparado • ${estado.originalSegundos}s`); card.querySelectorAll('[data-role="preset"]').forEach(btn=>btn.classList.toggle("active",Number(btn.dataset.seconds)===estado.originalSegundos)); }
+function atualizarTodosTimers(){Object.keys(timersDescanso).forEach(atualizarInterfaceTimer);}
+function iniciarTimer(id){const e=timersDescanso[id]; if(!e||e.emExecucao)return; e.emExecucao=true; e.alvoTimestamp=Date.now()+e.restanteSegundos*1000; salvarEstadoTimer(id); atualizarInterfaceTimer(id);}
+function pararTimer(id){const e=timersDescanso[id]; if(!e)return; atualizarRestantePeloRelogio(e); e.emExecucao=false; e.alvoTimestamp=null; salvarEstadoTimer(id); atualizarInterfaceTimer(id);}
+function selecionarTempoTimer(id,segundos){const e=timersDescanso[id]; e.originalSegundos=segundos; e.restanteSegundos=segundos; e.emExecucao=true; e.alvoTimestamp=Date.now()+segundos*1000; salvarEstadoTimer(id); atualizarInterfaceTimer(id);}
+function reiniciarTimer(id){const e=timersDescanso[id]; e.restanteSegundos=e.originalSegundos; e.emExecucao=false; e.alvoTimestamp=null; salvarEstadoTimer(id); atualizarInterfaceTimer(id);}
+function adicionarTempoTimer(id,segundos=30){const e=timersDescanso[id]; atualizarRestantePeloRelogio(e); e.restanteSegundos+=segundos; if(e.emExecucao)e.alvoTimestamp=Date.now()+e.restanteSegundos*1000; salvarEstadoTimer(id); atualizarInterfaceTimer(id);}
+function configurarTimersDescanso(){document.querySelectorAll('[data-timer-id]').forEach(card=>{const id=card.dataset.timerId; timersDescanso[id]=carregarEstadoTimer(id); card.querySelectorAll('[data-role="preset"]').forEach(btn=>btn.addEventListener("click",()=>selecionarTempoTimer(id,Number(btn.dataset.seconds)))); card.querySelector('[data-role="toggle"]')?.addEventListener("click",()=>timersDescanso[id].emExecucao?pararTimer(id):iniciarTimer(id)); card.querySelector('[data-role="reset"]')?.addEventListener("click",()=>reiniciarTimer(id)); card.querySelector('[data-role="add"]')?.addEventListener("click",()=>adicionarTempoTimer(id,30)); atualizarInterfaceTimer(id);}); if(intervaloGlobalDescanso)clearInterval(intervaloGlobalDescanso); intervaloGlobalDescanso=setInterval(atualizarTodosTimers,250); document.addEventListener("visibilitychange",()=>{if(!document.hidden)atualizarTodosTimers();}); window.addEventListener("pageshow",atualizarTodosTimers); window.addEventListener("focus",atualizarTodosTimers);}
 
 // ======================================================
 // INICIALIZAÇÃO
@@ -870,7 +836,7 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarResumoHome();
     renderizarSemanaTreino();
     renderizarPlanoCorridaCompleto();
-    configurarTimerDescanso();
+    configurarTimersDescanso();
     atualizarProximaRefeicao();
     atualizarProximaHidratacao();
     configurarBotaoNotificacoes();
