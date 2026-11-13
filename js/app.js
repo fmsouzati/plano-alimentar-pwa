@@ -782,16 +782,71 @@ function renderizarSemanaTreino() {
 
     document.getElementById("weekly-training-list").innerHTML = dias.map(item => `<div class="training-card"><div class="training-day ${item.tipo === "run" ? "run" : item.tipo === "rest" ? "rest" : ""}">${item.sigla}<span class="training-date">${formatarDataCurta(item.data)}</span></div><div><h3>${item.titulo}</h3><p>${item.detalhe}</p></div></div>`).join("");
 
-    document.getElementById("current-running-week").innerHTML = `<div class="training-summary-top"><strong>Semana ${semana}/16 • ${plano.fase}</strong><span>${formatarDataCurta(inicio)}–${formatarDataCurta(fim)}</span></div><p style="margin:8px 0 0;font-size:.76rem;color:#475569"><b>Terça:</b> ${plano.terca}<br><b>Quinta:</b> ${plano.quinta}<br><b>Sábado:</b> ${plano.sabado}</p>`;
 }
 
-function renderizarPlanoCorridaCompleto() {
-    const root = document.getElementById("running-plan-list");
+let semanaCorridaSelecionada = null;
+
+function obterDataSessaoCorrida(numeroSemana, offset) {
+    const inicio = dataInicioDaSemana(numeroSemana);
+    const data = new Date(inicio);
+    data.setDate(inicio.getDate() + offset);
+    data.setHours(0,0,0,0);
+    return data;
+}
+
+function tipoSessaoQuinta(texto) {
+    if (texto.includes("Funcional")) {
+        return { titulo:"Funcional", icone:"⚡", classe:"functional", tipo:"Condicionamento" };
+    }
+    return { titulo:"Tiros / qualidade", icone:"🏃", classe:"", tipo:"Velocidade" };
+}
+
+function renderizarSemanaCorrida(numeroSemana = semanaCorridaSelecionada || obterSemanaCiclo()) {
+    const semana = Math.max(1, Math.min(TOTAL_SEMANAS, numeroSemana));
+    semanaCorridaSelecionada = semana;
+    const plano = PLANO_CORRIDA_16_SEMANAS[semana - 1];
+    const { inicio, fim } = periodoDaSemana(semana);
     const semanaAtual = obterSemanaCiclo();
-    root.innerHTML = PLANO_CORRIDA_16_SEMANAS.map(p => {
-        const { inicio, fim } = periodoDaSemana(p.semana);
-        return `<div class="phase-card ${p.semana === semanaAtual ? "current-week" : ""}"><strong>Semana ${p.semana} • ${p.fase}</strong><span class="phase-date">${formatarDataCompleta(inicio)} a ${formatarDataCompleta(fim)}</span><p>Ter: ${p.terca}<br>Qui: ${p.quinta}<br>Sáb: ${p.sabado}</p></div>`;
-    }).join("");
+
+    const resumo = document.getElementById("current-running-week");
+    if (resumo) {
+        resumo.innerHTML = `<div class="training-summary-top"><strong>${semana === semanaAtual ? "Semana atual • " : ""}Semana ${semana}/16</strong><span>${plano.fase}</span></div><p style="margin:6px 0 0;font-size:.72rem;color:#475569">${formatarDataCompleta(inicio)} a ${formatarDataCompleta(fim)}</p>`;
+    }
+
+    const label = document.getElementById("running-selected-label");
+    const period = document.getElementById("running-selected-period");
+    if (label) label.textContent = `Semana ${semana}/16 • ${plano.fase}`;
+    if (period) period.textContent = `${formatarDataCompleta(inicio)} a ${formatarDataCompleta(fim)}`;
+
+    const quinta = tipoSessaoQuinta(plano.quinta);
+    const sessoes = [
+        { dia:"Terça", offset:2, titulo:"Rodagem / ritmo", detalhe:plano.terca, icone:"🏃", classe:"", tipo:"Corrida" },
+        { dia:"Quinta", offset:4, titulo:quinta.titulo, detalhe:plano.quinta, icone:quinta.icone, classe:quinta.classe, tipo:quinta.tipo },
+        { dia:"Sábado", offset:6, titulo:"Longão", detalhe:plano.sabado, icone:"🏃", classe:"", tipo:"Resistência" }
+    ];
+
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
+    const cards = document.getElementById("running-week-cards");
+    if (cards) {
+        cards.innerHTML = sessoes.map(sessao => {
+            const data = obterDataSessaoCorrida(semana, sessao.offset);
+            const ehHoje = data.getTime() === hoje.getTime();
+            return `<article class="running-session-card ${sessao.classe} ${ehHoje ? "today" : ""}"><div class="run-card-head"><span class="run-day">${sessao.dia}</span><span class="run-date">${formatarDataCurta(data)}</span></div><span class="run-icon">${sessao.icone}</span><h3>${sessao.titulo}</h3><p>${sessao.detalhe}</p><span class="run-kind">${sessao.tipo}</span></article>`;
+        }).join("");
+    }
+
+    const anterior = document.getElementById("running-prev-week");
+    const proxima = document.getElementById("running-next-week");
+    if (anterior) anterior.disabled = semana <= 1;
+    if (proxima) proxima.disabled = semana >= TOTAL_SEMANAS;
+}
+
+function configurarNavegacaoCorrida() {
+    semanaCorridaSelecionada = obterSemanaCiclo();
+    document.getElementById("running-prev-week")?.addEventListener("click", () => renderizarSemanaCorrida((semanaCorridaSelecionada || 1) - 1));
+    document.getElementById("running-next-week")?.addEventListener("click", () => renderizarSemanaCorrida((semanaCorridaSelecionada || 1) + 1));
+    renderizarSemanaCorrida(semanaCorridaSelecionada);
 }
 
 function switchFullBodyTab(tab) {
@@ -835,7 +890,7 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarProgressoCiclo();
     atualizarResumoHome();
     renderizarSemanaTreino();
-    renderizarPlanoCorridaCompleto();
+    configurarNavegacaoCorrida();
     configurarTimersDescanso();
     atualizarProximaRefeicao();
     atualizarProximaHidratacao();

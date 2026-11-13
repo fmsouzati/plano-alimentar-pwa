@@ -582,19 +582,39 @@
         .exercise-row { padding:8px 0; border-top:1px solid #f1f5f9; font-size:.76rem; }
         .exercise-row b { color:#0f172a; min-width:0; }
         .exercise-row span { color:#64748b; text-align:right; white-space:nowrap; }
-        .rest-timer { background:linear-gradient(135deg,#f8fafc,#ecfdf5); border:1px solid #bbf7d0; border-radius:16px; padding:14px; margin-bottom:12px; }
-        .rest-timer-top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
-        .rest-timer-title { font-size:.9rem; font-weight:800; color:#0f172a; }
-        .rest-timer-status { font-size:.68rem; font-weight:700; color:#64748b; }
-        .rest-presets { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
-        .rest-presets button, .rest-actions button { min-height:42px; border:1px solid #cbd5e1; background:#fff; color:#334155; border-radius:11px; font-weight:800; cursor:pointer; }
-        .rest-presets button.active { background:#059669; color:#fff; border-color:#059669; }
-        .rest-display { text-align:center; font-size:2.4rem; line-height:1; font-weight:800; letter-spacing:.02em; color:#0f172a; margin:14px 0 12px; font-variant-numeric:tabular-nums; }
+        .rest-timer { width:min(100%,560px); background:linear-gradient(135deg,#f8fafc,#ecfdf5); border:1px solid #bbf7d0; border-radius:14px; padding:11px 12px; margin:0 0 10px; }
+        .rest-timer-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:7px; }
+        .rest-timer-title { font-size:.82rem; font-weight:800; color:#0f172a; }
+        .rest-timer-status { font-size:.62rem; font-weight:700; color:#64748b; text-align:right; }
+        .rest-timer-main { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+        .rest-display { flex:0 0 auto; min-width:96px; text-align:left; font-size:1.85rem; line-height:1; font-weight:900; letter-spacing:.02em; color:#0f172a; font-variant-numeric:tabular-nums; }
         .rest-display.overtime { color:#dc2626; }
-        .rest-actions { display:grid; grid-template-columns:1.15fr 1fr 1fr; gap:7px; }
+        .rest-timer-controls { flex:1 1 300px; min-width:0; }
+        .rest-presets,.rest-actions { display:flex; gap:6px; flex-wrap:wrap; }
+        .rest-actions { margin-top:6px; }
+        .rest-presets button, .rest-actions button { min-height:34px; border:1px solid #cbd5e1; background:#fff; color:#334155; border-radius:9px; padding:6px 10px; font-size:.7rem; font-weight:800; cursor:pointer; }
+        .rest-presets button.active { background:#059669; color:#fff; border-color:#059669; }
         .rest-actions .primary { background:#0f172a; color:#fff; border-color:#0f172a; }
         .rest-actions .add { color:#0369a1; border-color:#bae6fd; background:#f0f9ff; }
-        .rest-timer-note { margin-top:8px; font-size:.66rem; color:#64748b; text-align:center; }
+        .rest-timer-note { margin-top:6px; font-size:.6rem; color:#64748b; text-align:left; }
+        .running-week-nav { display:grid; grid-template-columns:42px 1fr 42px; align-items:center; gap:8px; margin-bottom:10px; }
+        .running-week-nav button { min-height:42px; border:1px solid var(--border); border-radius:11px; background:#fff; color:#0f172a; font-size:1.2rem; font-weight:900; cursor:pointer; }
+        .running-week-nav button:disabled { opacity:.35; cursor:default; }
+        .running-week-center { text-align:center; min-width:0; }
+        .running-week-center strong { display:block; color:#0f172a; font-size:.88rem; }
+        .running-week-center small { display:block; margin-top:2px; color:#64748b; font-size:.66rem; }
+        .running-session-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; margin-bottom:10px; }
+        .running-session-card { min-width:0; background:#fff; border:1px solid #bfdbfe; border-radius:14px; padding:12px; box-shadow:0 1px 3px rgba(15,23,42,.04); }
+        .running-session-card.today { border:2px solid #059669; background:#f0fdf4; }
+        .running-session-card .run-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:6px; margin-bottom:7px; }
+        .running-session-card .run-day { font-size:.7rem; font-weight:900; color:#0369a1; text-transform:uppercase; }
+        .running-session-card .run-date { font-size:.64rem; font-weight:800; color:#64748b; white-space:nowrap; }
+        .running-session-card .run-icon { display:block; font-size:1.2rem; margin-bottom:5px; }
+        .running-session-card h3 { margin:0; color:#0f172a; font-size:.82rem; line-height:1.2; }
+        .running-session-card p { margin:5px 0 0; color:#475569; font-size:.68rem; line-height:1.35; }
+        .running-session-card .run-kind { display:inline-block; margin-top:7px; border-radius:999px; padding:4px 7px; background:#eff6ff; color:#1d4ed8; font-size:.6rem; font-weight:800; }
+        .running-session-card.functional .run-kind { background:#fff7ed; color:#c2410c; }
+        .running-section-title { margin:12px 0 7px; color:#0f172a; font-size:.82rem; font-weight:800; }
         .pre-run-box,.load-monitor { border-radius:14px; padding:13px; margin:10px 0; font-size:.77rem; }
         .pre-run-box { background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a; }
         .load-monitor { background:#fffbeb; border:1px solid #fde68a; color:#78350f; }
@@ -625,6 +645,11 @@
             .home-hero h1{font-size:1.45rem}
             .training-card{grid-template-columns:46px 1fr}
             .exercise-header,.exercise-row{grid-template-columns:minmax(0,1fr) 78px 62px;gap:6px}
+            .rest-timer{width:100%;padding:10px}
+            .rest-timer-main{align-items:flex-start}
+            .rest-display{font-size:1.65rem;min-width:88px}
+            .rest-presets button,.rest-actions button{padding:6px 8px;min-height:33px;font-size:.66rem}
+            .running-session-grid{grid-template-columns:1fr}
             .exercise-row{font-size:.72rem}
             .exercise-header{font-size:.58rem}
             .rest-display{font-size:2.15rem}
@@ -1475,7 +1500,6 @@
 <div class="week-days-grid" id="training-week-days"></div>
 </div>
 <div id="weekly-training-list"></div>
-<div class="load-monitor"><h3>⚠️ Monitoramento de carga</h3><ul><li>Dor leve e estável, sem mudar a passada: monitorar.</li><li>Se aumentar durante/depois do treino: reduzir impacto, volume ou intensidade.</li><li>Se alterar a passada, houver inchaço, perda de força ou piora importante: interromper impacto e procurar avaliação.</li></ul></div>
 </div>
 <div class="training-panel" id="training-fullbody">
 <div class="fullbody-subtabs">
@@ -1484,23 +1508,31 @@
 <button type="button" class="fullbody-subtab-btn" data-fullbody-tab="c" onclick="switchFullBodyTab('c')">Full Body C</button>
 </div>
 <div class="fullbody-panel active" id="fullbody-a">
-<div class="rest-timer" data-timer-id="a"><div class="rest-timer-top"><div class="rest-timer-title">⏱️ Descanso • Full Body A</div><div class="rest-timer-status" data-role="status">Escolha 60, 90 ou 120s</div></div><div class="rest-presets"><button type="button" data-role="preset" data-seconds="60">60s</button><button type="button" data-role="preset" data-seconds="90">90s</button><button type="button" data-role="preset" data-seconds="120">120s</button></div><div class="rest-display" data-role="display" aria-live="polite">01:30</div><div class="rest-actions"><button type="button" class="primary" data-role="toggle">▶ Play</button><button type="button" data-role="reset">↻ Reiniciar</button><button type="button" class="add" data-role="add">+30s</button></div><div class="rest-timer-note">Continua pelo relógio real mesmo se o app ficar em segundo plano.</div></div>
+<div class="rest-timer" data-timer-id="a"><div class="rest-timer-top"><div class="rest-timer-title">⏱️ Descanso • Full Body A</div><div class="rest-timer-status" data-role="status">Escolha 60, 90 ou 120s</div></div><div class="rest-timer-main"><div class="rest-display" data-role="display" aria-live="polite">01:30</div><div class="rest-timer-controls"><div class="rest-presets"><button type="button" data-role="preset" data-seconds="60">60s</button><button type="button" data-role="preset" data-seconds="90">90s</button><button type="button" data-role="preset" data-seconds="120">120s</button></div><div class="rest-actions"><button type="button" class="primary" data-role="toggle">▶ Play</button><button type="button" data-role="reset">↻ Reiniciar</button><button type="button" class="add" data-role="add">+30s</button></div></div></div><div class="rest-timer-note">Continua pelo relógio real mesmo se o app ficar em segundo plano.</div></div>
 <div class="exercise-card"><h3>🔴 Full Body A • segunda</h3><div class="exercise-header"><span>Exercício</span><span>Séries × reps</span><span>Descanso</span></div><div class="exercise-row"><b>Supino inclinado com halteres</b><span>3 × 6–10</span><span>120s</span></div><div class="exercise-row"><b>Puxada frontal</b><span>3 × 8–10</span><span>90s</span></div><div class="exercise-row"><b>Búlgaro ou Hack</b><span>3 × 8–10</span><span>120s</span></div><div class="exercise-row"><b>RDL / Stiff</b><span>2 × 8–10</span><span>120s</span></div><div class="exercise-row"><b>Elevação lateral</b><span>3 × 12–15</span><span>60s</span></div><div class="exercise-row"><b>Cable Crunch</b><span>3 × 10–15</span><span>60s</span></div><div class="tip-box"><strong>Cardio:</strong> esteira inclinada leve, 15–20 min em Z2.</div></div>
 </div>
 <div class="fullbody-panel" id="fullbody-b">
-<div class="rest-timer" data-timer-id="b"><div class="rest-timer-top"><div class="rest-timer-title">⏱️ Descanso • Full Body B</div><div class="rest-timer-status" data-role="status">Escolha 60, 90 ou 120s</div></div><div class="rest-presets"><button type="button" data-role="preset" data-seconds="60">60s</button><button type="button" data-role="preset" data-seconds="90">90s</button><button type="button" data-role="preset" data-seconds="120">120s</button></div><div class="rest-display" data-role="display" aria-live="polite">01:30</div><div class="rest-actions"><button type="button" class="primary" data-role="toggle">▶ Play</button><button type="button" data-role="reset">↻ Reiniciar</button><button type="button" class="add" data-role="add">+30s</button></div><div class="rest-timer-note">Continua pelo relógio real mesmo se o app ficar em segundo plano.</div></div>
+<div class="rest-timer" data-timer-id="b"><div class="rest-timer-top"><div class="rest-timer-title">⏱️ Descanso • Full Body B</div><div class="rest-timer-status" data-role="status">Escolha 60, 90 ou 120s</div></div><div class="rest-timer-main"><div class="rest-display" data-role="display" aria-live="polite">01:30</div><div class="rest-timer-controls"><div class="rest-presets"><button type="button" data-role="preset" data-seconds="60">60s</button><button type="button" data-role="preset" data-seconds="90">90s</button><button type="button" data-role="preset" data-seconds="120">120s</button></div><div class="rest-actions"><button type="button" class="primary" data-role="toggle">▶ Play</button><button type="button" data-role="reset">↻ Reiniciar</button><button type="button" class="add" data-role="add">+30s</button></div></div></div><div class="rest-timer-note">Continua pelo relógio real mesmo se o app ficar em segundo plano.</div></div>
 <div class="exercise-card"><h3>🟢 Full Body B • quarta</h3><div class="exercise-header"><span>Exercício</span><span>Séries × reps</span><span>Descanso</span></div><div class="exercise-row"><b>RDL / Stiff</b><span>3 × 6–10</span><span>120s</span></div><div class="exercise-row"><b>Desenvolvimento com halteres</b><span>3 × 8–10</span><span>90s</span></div><div class="exercise-row"><b>Remada baixa/apoiada</b><span>3 × 8–12</span><span>90s</span></div><div class="exercise-row"><b>Leg Press ou agachamento</b><span>3 × 8–12</span><span>120s</span></div><div class="exercise-row"><b>Crucifixo inverso</b><span>2–3 × 12–15</span><span>60s</span></div><div class="exercise-row"><b>Rosca direta + tríceps pulley</b><span>2–3 × 10–12</span><span>60s</span></div><div class="tip-box"><strong>Cardio:</strong> por enquanto, bike/elíptico leve 10–15 min em vez de corda, até avaliar o Aquiles.</div></div>
 </div>
 <div class="fullbody-panel" id="fullbody-c">
-<div class="rest-timer" data-timer-id="c"><div class="rest-timer-top"><div class="rest-timer-title">⏱️ Descanso • Full Body C</div><div class="rest-timer-status" data-role="status">Escolha 60, 90 ou 120s</div></div><div class="rest-presets"><button type="button" data-role="preset" data-seconds="60">60s</button><button type="button" data-role="preset" data-seconds="90">90s</button><button type="button" data-role="preset" data-seconds="120">120s</button></div><div class="rest-display" data-role="display" aria-live="polite">01:30</div><div class="rest-actions"><button type="button" class="primary" data-role="toggle">▶ Play</button><button type="button" data-role="reset">↻ Reiniciar</button><button type="button" class="add" data-role="add">+30s</button></div><div class="rest-timer-note">Continua no negativo após 00:00 e mantém o estado salvo no aparelho.</div></div>
+<div class="rest-timer" data-timer-id="c"><div class="rest-timer-top"><div class="rest-timer-title">⏱️ Descanso • Full Body C</div><div class="rest-timer-status" data-role="status">Escolha 60, 90 ou 120s</div></div><div class="rest-timer-main"><div class="rest-display" data-role="display" aria-live="polite">01:30</div><div class="rest-timer-controls"><div class="rest-presets"><button type="button" data-role="preset" data-seconds="60">60s</button><button type="button" data-role="preset" data-seconds="90">90s</button><button type="button" data-role="preset" data-seconds="120">120s</button></div><div class="rest-actions"><button type="button" class="primary" data-role="toggle">▶ Play</button><button type="button" data-role="reset">↻ Reiniciar</button><button type="button" class="add" data-role="add">+30s</button></div></div></div><div class="rest-timer-note">Continua no negativo após 00:00 e mantém o estado salvo no aparelho.</div></div>
 <div class="exercise-card"><h3>🔵 Full Body C • sexta</h3><div class="exercise-header"><span>Exercício</span><span>Séries × reps</span><span>Descanso</span></div><div class="exercise-row"><b>Supino inclinado</b><span>3 × 6–8</span><span>120s</span></div><div class="exercise-row"><b>Remada</b><span>3 × 6–10</span><span>90s</span></div><div class="exercise-row"><b>Pull down na corda</b><span>2 × 12–15</span><span>60s</span></div><div class="exercise-row"><b>Leg Press / Hack</b><span>3 × 8–10</span><span>120s</span></div><div class="exercise-row"><b>Flexora</b><span>3 × 10–12</span><span>90s</span></div><div class="exercise-row"><b>Elevação lateral unilateral</b><span>3 × 12–15</span><span>60s</span></div><div class="exercise-row"><b>Rosca martelo + tríceps testa</b><span>2–3 × 10–12</span><span>60s</span></div><div class="exercise-row"><b>Prancha com peso</b><span>3 séries</span><span>60s</span></div><div class="tip-box"><strong>Cardio:</strong> esteira inclinada leve 10–15 min. Preserve as pernas para o longão.</div></div>
 </div>
 <div class="phase-card"><strong>Progressão</strong><p>Trabalhe normalmente com ~RIR 2. Ao atingir o topo da faixa com técnica boa, aumente a carga de forma pequena.</p></div>
 </div>
 <div class="training-panel" id="training-running">
 <div class="training-summary" id="current-running-week"></div>
+<div class="running-week-nav" aria-label="Selecionar semana da corrida">
+<button type="button" id="running-prev-week" aria-label="Semana anterior">‹</button>
+<div class="running-week-center"><strong id="running-selected-label">Semana 1/16</strong><small id="running-selected-period">25/10/2026 a 31/10/2026</small></div>
+<button type="button" id="running-next-week" aria-label="Próxima semana">›</button>
+</div>
+<div class="running-session-grid" id="running-week-cards"></div>
+<div class="running-section-title">Preparação antes de correr</div>
 <div class="pre-run-box"><h3>🏃 Protocolo pré-corrida • 6–8 min</h3><ol><li>Mobilidade de tornozelo: 10 repetições por lado.</li><li>Caminhada nos calcanhares: 2 × 20–30 s.</li><li>Panturrilha leve: 1–2 × 12–15.</li><li>Marcha/skipping leve: 30–60 s.</li><li>Caminhada/trote fácil: 3–5 min.</li><li>Nos tiros: 2–4 acelerações progressivas de 15–20 s, somente se estiver sem dor relevante.</li></ol></div>
-<div id="running-plan-list"></div>
+<div class="running-section-title">Como ajustar a carga</div>
+<div class="load-monitor"><h3>⚠️ Monitoramento de carga e dor</h3><ul><li><strong>Verde:</strong> dor leve e estável, sem mudar a passada: monitorar e manter a sessão planejada.</li><li><strong>Amarelo:</strong> dor aumentando durante ou depois do treino, ou mais perceptível no dia seguinte: reduzir impacto, volume ou intensidade.</li><li><strong>Vermelho:</strong> alteração da passada, inchaço, perda de força, joelho travando/falhando ou piora importante: interromper impacto e procurar avaliação.</li></ul></div>
 </div>
 </section><nav aria-label="Navegação principal" class="bottom-nav"><button class="active" data-screen-nav="home" onclick="openScreen('home')"><span>⌂</span>Início</button><button data-screen-nav="food" onclick="openScreen('food')"><span>🍽️</span>Alimentação</button><button data-screen-nav="training" onclick="openScreen('training','week')"><span>🏋️</span>Treinos</button></nav></div>
 <script src="js/app.js"></script>
