@@ -815,11 +815,6 @@ function renderizarSemanaCorrida(numeroSemana = semanaCorridaSelecionada || obte
     const { inicio, fim } = periodoDaSemana(semana);
     const semanaAtual = obterSemanaCiclo();
 
-    const resumo = document.getElementById("current-running-week");
-    if (resumo) {
-        resumo.innerHTML = `<div class="training-summary-top"><strong>${semana === semanaAtual ? "Semana atual • " : ""}Semana ${semana}/16</strong><span>${plano.fase}</span></div><p style="margin:6px 0 0;font-size:.72rem;color:#475569">${formatarDataCompleta(inicio)} a ${formatarDataCompleta(fim)}</p>`;
-    }
-
     const label = document.getElementById("running-selected-label");
     const period = document.getElementById("running-selected-period");
     if (label) label.textContent = `Semana ${semana}/16 • ${plano.fase}`;
@@ -827,9 +822,9 @@ function renderizarSemanaCorrida(numeroSemana = semanaCorridaSelecionada || obte
 
     const quinta = tipoSessaoQuinta(plano.quinta);
     const sessoes = [
-        { dia:"Terça", offset:2, titulo:"Rodagem / ritmo", detalhe:plano.terca, icone:"🏃", classe:"", tipo:"Corrida" },
-        { dia:"Quinta", offset:4, titulo:quinta.titulo, detalhe:plano.quinta, icone:quinta.icone, classe:quinta.classe, tipo:quinta.tipo },
-        { dia:"Sábado", offset:6, titulo:"Longão", detalhe:plano.sabado, icone:"🏃", classe:"", tipo:"Resistência" }
+        { dia:"Terça", offset:2, titulo:"Rodagem / ritmo", detalhe:plano.terca, icone:"🏃", classe:"tuesday", tipo:"Corrida" },
+        { dia:"Quinta", offset:4, titulo:quinta.titulo, detalhe:plano.quinta, icone:quinta.icone, classe:"thursday", tipo:plano.quinta.includes("Funcional") ? "Condic." : "Velocidade" },
+        { dia:"Sábado", offset:6, titulo:"Longão", detalhe:plano.sabado, icone:"🏃", classe:"saturday", tipo:"Resist." }
     ];
 
     const hoje = new Date();
@@ -839,7 +834,7 @@ function renderizarSemanaCorrida(numeroSemana = semanaCorridaSelecionada || obte
         cards.innerHTML = sessoes.map(sessao => {
             const data = obterDataSessaoCorrida(semana, sessao.offset);
             const ehHoje = data.getTime() === hoje.getTime();
-            return `<article class="running-session-card ${sessao.classe} ${ehHoje ? "today" : ""}"><div class="run-card-head"><span class="run-day">${sessao.dia}</span><span class="run-date">${formatarDataCurta(data)}</span></div><span class="run-icon">${sessao.icone}</span><h3>${sessao.titulo}</h3><p>${sessao.detalhe}</p><span class="run-kind">${sessao.tipo}</span></article>`;
+            return `<article class="running-session-card ${sessao.classe} ${ehHoje ? "today" : ""}" aria-label="${sessao.dia}, ${formatarDataCurta(data)}: ${sessao.titulo}. ${sessao.detalhe}"><span class="run-icon" aria-hidden="true">${sessao.icone}</span><div class="run-card-head"><span class="run-day">${sessao.dia}</span><span class="run-date">${formatarDataCurta(data)}</span></div><h3>${sessao.titulo}</h3><p>${sessao.detalhe}</p><span class="run-kind">${sessao.tipo}</span></article>`;
         }).join("");
     }
 
