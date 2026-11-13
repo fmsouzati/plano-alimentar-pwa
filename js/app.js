@@ -882,7 +882,33 @@ function carregarEstadoTimer(id) { try { const salvo=localStorage.getItem(chaveS
 function salvarEstadoTimer(id) { try { localStorage.setItem(chaveStorageTimer(id),JSON.stringify(timersDescanso[id])); } catch {} }
 function atualizarRestantePeloRelogio(estado) { if(estado.emExecucao&&estado.alvoTimestamp) estado.restanteSegundos=Math.ceil((estado.alvoTimestamp-Date.now())/1000); }
 function formatarTimerDescanso(segundos) { const negativo=segundos<0; const abs=Math.abs(segundos); return `${negativo?"-":""}${String(Math.floor(abs/60)).padStart(2,"0")}:${String(abs%60).padStart(2,"0")}`; }
-function atualizarInterfaceTimer(id) { const card=document.querySelector(`[data-timer-id="${id}"]`); const estado=timersDescanso[id]; if(!card||!estado)return; atualizarRestantePeloRelogio(estado); const display=card.querySelector('[data-role="display"]'); const status=card.querySelector('[data-role="status"]'); const toggle=card.querySelector('[data-role="toggle"]'); display.textContent=formatarTimerDescanso(estado.restanteSegundos); display.classList.toggle("overtime",estado.restanteSegundos<0); toggle.textContent=estado.emExecucao?"⏸ Parar":"▶ Play"; status.textContent=estado.emExecucao?(estado.restanteSegundos<0?"Tempo excedido":`Descanso de ${estado.originalSegundos}s`):(estado.restanteSegundos<0?"Parado no tempo excedido":`Preparado • ${estado.originalSegundos}s`); card.querySelectorAll('[data-role="preset"]').forEach(btn=>btn.classList.toggle("active",Number(btn.dataset.seconds)===estado.originalSegundos)); }
+function atualizarInterfaceTimer(id) {
+    const card = document.querySelector(`[data-timer-id="${id}"]`);
+    const estado = timersDescanso[id];
+    if (!card || !estado) return;
+
+    atualizarRestantePeloRelogio(estado);
+
+    const display = card.querySelector('[data-role="display"]');
+    const status = card.querySelector('[data-role="status"]');
+    const toggle = card.querySelector('[data-role="toggle"]');
+
+    display.textContent = formatarTimerDescanso(estado.restanteSegundos);
+    display.classList.toggle("overtime", estado.restanteSegundos < 0);
+
+    toggle.textContent = estado.emExecucao ? "⏸ Parar" : "▶ Play";
+    toggle.setAttribute("aria-pressed", estado.emExecucao ? "true" : "false");
+
+    status.textContent = estado.emExecucao
+        ? (estado.restanteSegundos < 0 ? "Tempo excedido" : `Rodando • ${estado.originalSegundos}s`)
+        : (estado.restanteSegundos < 0 ? "Parado • excedido" : `Preparado • ${estado.originalSegundos}s`);
+
+    card.querySelectorAll('[data-role="preset"]').forEach(btn => {
+        const ativo = Number(btn.dataset.seconds) === estado.originalSegundos;
+        btn.classList.toggle("active", ativo);
+        btn.setAttribute("aria-pressed", ativo ? "true" : "false");
+    });
+}
 function atualizarTodosTimers(){Object.keys(timersDescanso).forEach(atualizarInterfaceTimer);}
 function iniciarTimer(id){const e=timersDescanso[id]; if(!e||e.emExecucao)return; e.emExecucao=true; e.alvoTimestamp=Date.now()+e.restanteSegundos*1000; salvarEstadoTimer(id); atualizarInterfaceTimer(id);}
 function pararTimer(id){const e=timersDescanso[id]; if(!e)return; atualizarRestantePeloRelogio(e); e.emExecucao=false; e.alvoTimestamp=null; salvarEstadoTimer(id); atualizarInterfaceTimer(id);}

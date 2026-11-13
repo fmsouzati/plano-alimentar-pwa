@@ -1,10 +1,10 @@
-const CACHE_NAME = "plano-hibrido-v12";
+const CACHE_NAME = "plano-hibrido-v13";
 
 const arquivosParaCache = [
     "./",
     "./index.html",
     "./css/style.css",
-    "./js/app.js?v=12",
+    "./js/app.js?v=13",
     "./manifest.json",
     "./icons/icon-192.png",
     "./icons/icon-512.png"
