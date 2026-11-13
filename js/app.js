@@ -1,4 +1,4 @@
-console.log("Aplicativo carregado com sucesso.");
+console.log("Aplicativo carregado com sucesso. • frontend v12");
 
 // ======================================================
 // AMBIENTE / SERVICE WORKER
@@ -24,7 +24,7 @@ if ("serviceWorker" in navigator) {
         }
     } else {
         navigator.serviceWorker
-            .register("./service-worker.js")
+            .register("./service-worker.js?v=12")
             .then(() => {
                 console.log("Service Worker registrado com sucesso.");
             })
@@ -694,6 +694,13 @@ function switchTrainingTab(tab) {
     document.querySelectorAll('.training-tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(`training-${tab}`)?.classList.add('active');
     document.querySelector(`[data-training-tab="${tab}"]`)?.classList.add('active');
+
+    // Revalida os cards ao abrir a aba Corrida. Isso também protege contra
+    // estados antigos do PWA após uma atualização de frontend.
+    if (tab === 'running') {
+        if (!semanaCorridaSelecionada) semanaCorridaSelecionada = obterSemanaCiclo();
+        requestAnimationFrame(() => renderizarSemanaCorrida(semanaCorridaSelecionada));
+    }
 }
 window.switchTrainingTab = switchTrainingTab;
 
@@ -844,8 +851,12 @@ function renderizarSemanaCorrida(numeroSemana = semanaCorridaSelecionada || obte
 
 function configurarNavegacaoCorrida() {
     semanaCorridaSelecionada = obterSemanaCiclo();
-    document.getElementById("running-prev-week")?.addEventListener("click", () => renderizarSemanaCorrida((semanaCorridaSelecionada || 1) - 1));
-    document.getElementById("running-next-week")?.addEventListener("click", () => renderizarSemanaCorrida((semanaCorridaSelecionada || 1) + 1));
+    const anterior = document.getElementById("running-prev-week");
+    const proxima = document.getElementById("running-next-week");
+
+    if (anterior) anterior.onclick = () => renderizarSemanaCorrida((semanaCorridaSelecionada || 1) - 1);
+    if (proxima) proxima.onclick = () => renderizarSemanaCorrida((semanaCorridaSelecionada || 1) + 1);
+
     renderizarSemanaCorrida(semanaCorridaSelecionada);
 }
 
